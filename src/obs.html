@@ -1,0 +1,68 @@
+<section class="world" id="world-obs">
+  <div class="subbar">
+    <div class="clock">
+      <div><b id="bSince">—</b><span data-b18n="since">يعمل منذ</span></div>
+      <div><b id="bGens">—</b><span data-b18n="gens">جيل خلوي</span></div>
+      <div><b id="bBio">—</b><span data-b18n="bio">زمن بيولوجي</span></div>
+      <div><b id="bEra">—</b><span data-b18n="era">الحقبة</span></div>
+      <div><b id="bRuns">—</b><span data-b18n="runs">جلسات تشغيل</span></div>
+      <div><b id="bUpd">—</b><span data-b18n="updated">آخر تحديث</span></div>
+    </div>
+    <div class="transport">
+      <button class="btn on" id="bWatch" data-b18n="watch">شاهد العالم الأبدي الآن</button>
+      <button class="btn" id="bReload" data-b18n="reload">تحديث</button>
+    </div>
+  </div>
+
+  <section class="intro">
+    <p data-b18n-html="intro"></p>
+    <p class="note" id="bSource"></p>
+  </section>
+
+  <div class="obs-grid">
+    <section class="panel ladder-panel">
+      <h2><span data-b18n="ladder">سلّم التعقيد</span><small data-b18n="ladder_s"></small></h2>
+      <ol class="ladder" id="bLadder"></ol>
+    </section>
+    <section class="panel">
+      <h2><span data-b18n="records">الأرقام القياسية</span></h2>
+      <dl class="kv" id="bRecords"></dl>
+      <div class="divider"></div>
+      <h2><span data-b18n="nowT">الآن</span></h2>
+      <dl class="kv" id="bNow"></dl>
+    </section>
+    <section class="panel span2">
+      <h2><span data-b18n="h_org">تعدد الخلايا عبر الزمن</span><small data-b18n="h_org_s"></small></h2>
+      <canvas class="chart" id="bOrg"></canvas>
+      <div class="leg" id="bOrgLeg"></div>
+    </section>
+    <section class="panel">
+      <h2><span data-b18n="h_genes">الجينات عبر الزمن</span></h2>
+      <canvas class="chart" id="bGenesC"></canvas>
+      <div class="leg" id="bGenesLeg"></div>
+    </section>
+    <section class="panel">
+      <h2><span data-b18n="h_arms">سباق التسلح الطويل</span><small data-b18n="h_arms_s"></small></h2>
+      <canvas class="chart" id="bArms"></canvas>
+      <div class="leg" id="bArmsLeg"></div>
+    </section>
+    <section class="panel span2">
+      <h2><span data-b18n="h_env">المناخ</span><small data-b18n="h_env_s"></small></h2>
+      <canvas class="chart" id="bEnv"></canvas>
+      <div class="leg" id="bEnvLeg"></div>
+    </section>
+    <section class="panel span2">
+      <h2><span data-b18n="fossils">سجلّ الأحافير</span><small data-b18n="fossils_s"></small></h2>
+      <div class="fossils" id="bFossils"></div>
+    </section>
+    <section class="panel span2">
+      <h2><span data-b18n="laws">قوانين التطور: النظرية مقابل التجربة</span><small id="bLawsMeta"></small></h2>
+      <div class="laws" id="bLaws"></div>
+    </section>
+    <section class="panel span2">
+      <h2><span data-b18n="mslog">سجلّ المحطات</span></h2>
+      <div class="ticker" id="bMs"></div>
+    </section>
+  </div>
+  <p class="foot" data-b18n="foot"></p>
+</section>

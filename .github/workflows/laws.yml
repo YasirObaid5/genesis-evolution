@@ -1,0 +1,36 @@
+# Adds replicate experiments to the laws observatory and recomputes every verdict.
+name: laws-observatory
+
+on:
+  schedule:
+    - cron: '41 1 * * *'          # once a day (UTC)
+  workflow_dispatch:
+    inputs:
+      minutes:
+        description: 'Minutes of experiments in this run'
+        default: '45'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: genesis-data
+  cancel-in-progress: false
+
+jobs:
+  experiments:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Fetch the saved data
+        run: bash runner/fetch-data.sh
+      - name: Run experiments
+        run: MINUTES=${{ github.event.inputs.minutes || '45' }} DATA_DIR=data node runner/laws.mjs
+      - name: Publish results
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: bash runner/publish-data.sh "laws update"

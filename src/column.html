@@ -1,0 +1,115 @@
+<section class="world" id="world-column">
+  <div class="subbar">
+    <div class="clock">
+      <div><b id="kPhys">0</b><span data-c18n="phys_t">زمن فيزيائي</span></div>
+      <div><b id="kBio">0</b><span data-c18n="bio_t">زمن بيولوجي</span></div>
+      <div><b id="kGens">0</b><span data-c18n="gens">جيل خلوي</span></div>
+      <div><b id="kCells">0</b><span data-c18n="cells">خلية</span></div>
+      <div><b id="kOrg">0%</b><span data-c18n="inOrg">داخل كائنات</span></div>
+      <div><b id="kPred">0</b><span data-c18n="preds">مفترس</span></div>
+      <div><b id="kFlow">0</b><span data-c18n="flow">سرعة التيار</span></div>
+    </div>
+    <div class="transport">
+      <button class="btn play on" id="cPlay">إيقاف مؤقت</button>
+      <div class="seg" id="cSpeed" role="group" aria-label="speed">
+        <button data-v="1">1×</button><button data-v="4" class="on">4×</button><button data-v="8">8×</button><button data-v="16">16×</button>
+      </div>
+    </div>
+  </div>
+
+  <section class="intro" id="cIntro">
+    <p data-c18n-html="c_intro"></p>
+    <button class="btn" id="cIntroClose" data-i18n="hide">إخفاء</button>
+  </section>
+
+  <main class="lab">
+    <aside class="col controls">
+      <section class="panel">
+        <h2><span data-c18n="physics">الفيزياء</span></h2>
+        <label class="toggle" for="cFlowT"><input type="checkbox" id="cFlowT" checked><span><b data-c18n="c_flow"></b><small data-c18n="c_flow_d"></small></span></label>
+        <div class="ctl"><label for="cLight"><span data-c18n="c_light"></span><output id="cLightO"></output></label><input type="range" id="cLight" min="0.2" max="1.5" step="0.05" value="1"></div>
+        <div class="ctl"><label for="cTurb"><span data-c18n="c_turb"></span><output id="cTurbO"></output></label><input type="range" id="cTurb" min="0" max="0.0025" step="0.0001" value="0.0012"></div>
+        <div class="ctl"><label for="cNut"><span data-c18n="c_nut"></span><output id="cNutO"></output></label><input type="range" id="cNut" min="0.3" max="2" step="0.05" value="1"></div>
+        <div class="ctl"><span class="lbl" data-c18n="c_source"></span><div class="seg" id="cSrc"><button data-v="mixed" class="on" data-c18n="src_mixed"></button><button data-v="sediment" data-c18n="src_sed"></button></div></div>
+        <button class="btn" id="cStir" data-c18n="c_stir"></button>
+      </section>
+      <section class="panel">
+        <h2><span data-c18n="biology">الأحياء</span></h2>
+        <label class="toggle" for="cPredT"><input type="checkbox" id="cPredT" checked><span><b data-c18n="c_pred"></b><small data-c18n="c_pred_d"></small></span></label>
+        <div class="ctl"><label for="cRatio"><span data-c18n="c_ratio"></span><output id="cRatioO"></output></label><input type="range" id="cRatio" min="0" max="6" step="0.5" value="3"></div>
+        <div class="ctl"><label for="cMut"><span data-c18n="c_mut"></span><output id="cMutO"></output></label><input type="range" id="cMut" min="0" max="0.2" step="0.01" value="0.08"></div>
+        <p class="note" data-c18n="c_clock"></p>
+        <div class="divider"></div>
+        <h2><span data-c18n="view">العرض</span></h2>
+        <label class="check"><input type="checkbox" id="cTr" checked> <span data-c18n="c_tracers"></span></label>
+        <label class="check"><input type="checkbox" id="cQ"> <span data-c18n="c_quiver"></span></label>
+        <div class="ctl">
+          <span class="lbl" data-c18n="c_color"></span>
+          <select id="cColor">
+            <option value="lin" data-c18n="cb_lin"></option><option value="type" data-c18n="cb_type"></option>
+            <option value="swim" data-c18n="cb_swim"></option><option value="buoy" data-c18n="cb_buoy"></option><option value="bond" data-c18n="cb_bond"></option>
+          </select>
+        </div>
+        <div class="row"><button class="btn" id="cReset" data-c18n="c_reset"></button><span class="note mono" id="cSeed"></span></div>
+      </section>
+    </aside>
+
+    <section class="stage">
+      <div class="world-wrap tank-wrap">
+        <canvas id="tank" aria-label="water column"></canvas>
+        <div class="hud" id="cHud"></div>
+        <div class="zoom"><button id="cZin" aria-label="zoom in">+</button><button id="cZout" aria-label="zoom out">−</button><button id="cZreset" aria-label="reset view">⟲</button></div>
+        <p class="hint" data-c18n="hint"></p>
+        <div class="overlay" id="cExtinct" hidden><div><h3 data-i18n="extinctT">انقرض القطيع</h3><button class="btn on" id="cRestart" data-c18n="c_reset">عمود جديد</button></div></div>
+      </div>
+      <div class="presets" id="cPresets"></div>
+      <section class="panel">
+        <h2><span data-c18n="card">بطاقة الكائن</span></h2>
+        <div class="insp-grid">
+          <div>
+            <div id="cCard"></div>
+            <div class="row" id="cTools" hidden style="margin-top:10px"><button class="btn" id="cFollow"></button><button class="btn" id="cZoomTo" data-c18n="zoomto"></button></div>
+          </div>
+          <div class="gbox">
+            <canvas id="cMini" hidden></canvas>
+            <canvas id="cLin" hidden></canvas>
+            <p class="gcap" id="cLinCap" hidden data-c18n="lineage"></p>
+          </div>
+        </div>
+      </section>
+      <section class="panel">
+        <h2><span data-c18n="log">سجلّ الأحداث</span></h2>
+        <div class="ticker" id="cTicker"></div>
+      </section>
+    </section>
+
+    <aside class="col analytics">
+      <section class="panel">
+        <h2><span data-c18n="ch_flow">الحمل الحيوي</span><small data-c18n="ch_flow_s"></small></h2>
+        <canvas class="chart" id="cFlow"></canvas>
+        <div class="leg" id="cFlowLeg"></div>
+      </section>
+      <section class="panel">
+        <h2><span data-c18n="ch_prof">المقطع الرأسي</span><small data-c18n="ch_prof_s"></small></h2>
+        <canvas class="chart tall" id="cProf"></canvas>
+        <div class="leg" id="cProfLeg"></div>
+      </section>
+      <section class="panel">
+        <h2><span data-c18n="ch_river">نهر الأشكال</span><small data-c18n="ch_river_s"></small></h2>
+        <canvas class="chart" id="cRiver"></canvas>
+        <div class="leg" id="cRiverLeg"></div>
+      </section>
+      <section class="panel">
+        <h2><span data-c18n="ch_arms">سباق التسلح</span><small data-c18n="ch_arms_s"></small></h2>
+        <canvas class="chart" id="cArms"></canvas>
+        <div class="leg" id="cArmsLeg"></div>
+      </section>
+      <section class="panel">
+        <h2><span data-c18n="ch_genes">الجينات</span><small data-c18n="ch_genes_s"></small></h2>
+        <canvas class="chart" id="cGenes"></canvas>
+        <div class="leg" id="cGenesLeg"></div>
+      </section>
+    </aside>
+  </main>
+  <p class="foot" data-c18n="footer"></p>
+</section>

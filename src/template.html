@@ -1,0 +1,439 @@
+<title>Genesis Herd Lab</title>
+<meta name="description" content="A living genetics laboratory: evolving animals with diploid genomes, estrus cycles and neural brains, with natural selection, artificial insemination and genomic selection.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Reem+Kufi:wght@500;700&display=swap">
+<style>
+/* Layout: a night-time field station. Controls rail | living world | analytics rail; stacks to one column on phones.
+   Single deliberate dark look: the world is a moonlit desert with oases, the panels are instrument housings. */
+:root {
+  color-scheme: dark;
+  --ink-0: #0c1316;      /* page */
+  --ink-1: #121b1f;      /* panel */
+  --ink-2: #19262b;      /* raised / inputs */
+  --line: #26363c;
+  --sand: #ebdfc4;       /* primary text */
+  --sand-2: #a99f8a;     /* secondary text */
+  --sand-3: #6f6a5d;     /* tertiary */
+  --saffron: #e3a33b;    /* accent: selection, elite sires, straws */
+  --female: #f2876f;
+  --male: #63b3dd;
+  --leaf: #86b46c;
+  --heat: #e4572e;
+  --good: #86b46c; --warn: #e3a33b; --bad: #e4572e;
+  --t0: #e3a33b; --t1: #63b3dd; --t2: #b39cf0; --t3: #e4572e; --t4: #ef7fb0; --t5: #86b46c;
+  --display: "Reem Kufi", "IBM Plex Sans Arabic", "Segoe UI", Tahoma, sans-serif;
+  --body: "IBM Plex Sans Arabic", "Segoe UI", Tahoma, system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --r: 10px;
+  --fs-xs: 0.72rem; --fs-s: 0.8rem; --fs-m: 0.9rem; --fs-l: 1.05rem; --fs-xl: 1.5rem;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { min-height: 100%; }
+body { background: var(--ink-0); color: var(--sand); font-family: var(--body); font-size: 14px; line-height: 1.5; padding-inline: 16px; padding-block: 12px 32px; }
+button, select, input { font: inherit; color: inherit; }
+.num, .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+:focus-visible { outline: 2px solid var(--saffron); outline-offset: 2px; }
+
+/* ---------- top bar ---------- */
+.bar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; padding-block: 6px 14px; border-bottom: 1px solid var(--line); margin-bottom: 14px; }
+.brand { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; min-width: 0; }
+.brand h1 { font-family: var(--display); font-weight: 700; font-size: 1.9rem; margin: 0; letter-spacing: 0.01em; line-height: 1.1; }
+.brand h1 .lat { font-family: var(--display); font-weight: 500; font-size: 0.95rem; letter-spacing: 0.32em; color: var(--saffron); margin-inline-start: 8px; }
+:root[lang=en] .brand h1 .lat { display: none; }
+.brand p { margin: 0; color: var(--sand-2); font-size: var(--fs-s); max-width: 60ch; }
+.clock { display: flex; gap: 18px; flex-wrap: wrap; margin-inline-start: auto; }
+.clock div { display: grid; }
+.clock b { font-family: var(--mono); font-weight: 500; font-size: 1.15rem; font-variant-numeric: tabular-nums; }
+.clock span { font-size: var(--fs-xs); color: var(--sand-2); letter-spacing: 0.04em; }
+.transport { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.btn { background: var(--ink-2); border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px; cursor: pointer; font-size: var(--fs-s); transition: border-color .15s, background .15s; }
+.btn:hover { border-color: var(--sand-3); }
+.btn.on { background: var(--saffron); color: #1a1205; border-color: var(--saffron); font-weight: 600; }
+.btn.play { min-width: 84px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.seg button { background: var(--ink-2); border: 0; padding: 6px 10px; cursor: pointer; font-size: var(--fs-s); border-inline-end: 1px solid var(--line); }
+.seg button:last-child { border-inline-end: 0; }
+.seg button.on { background: var(--saffron); color: #1a1205; font-weight: 600; }
+
+/* ---------- grid ---------- */
+.lab { display: grid; gap: 14px; grid-template-columns: 290px minmax(0, 1fr) 380px; align-items: start; }
+@media (max-width: 1380px) { .lab { grid-template-columns: 280px minmax(0, 1fr); } .analytics { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); } }
+@media (max-width: 860px) { .lab { grid-template-columns: minmax(0, 1fr); } .controls { order: 2; } .stage { order: 1; } .analytics { order: 3; } }
+.panel { background: var(--ink-1); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; min-width: 0; }
+.panel h2 { font-family: var(--display); font-weight: 500; font-size: var(--fs-l); margin: 0 0 8px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; text-wrap: balance; }
+.panel h2 > span { flex: none; }
+.panel h2 small { font-family: var(--body); font-size: var(--fs-xs); color: var(--sand-2); font-weight: 400; }
+.col { display: grid; gap: 14px; min-width: 0; }
+.analytics { gap: 14px; }
+
+/* ---------- controls ---------- */
+.ctl { display: grid; gap: 4px; margin-block: 10px; }
+.ctl label, .ctl .lbl { display: flex; justify-content: space-between; gap: 8px; font-size: var(--fs-s); color: var(--sand-2); }
+.ctl label output { color: var(--sand); font-family: var(--mono); font-variant-numeric: tabular-nums; }
+input[type=range] { width: 100%; accent-color: var(--saffron); }
+select { background: var(--ink-2); border: 1px solid var(--line); border-radius: 8px; padding: 5px 8px; width: 100%; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.row > * { flex: 1 1 auto; }
+.row > .seg, .ctl > .seg { flex: 0 0 auto; justify-self: start; }
+.check { display: flex; gap: 8px; align-items: center; font-size: var(--fs-s); color: var(--sand-2); cursor: pointer; }
+.check input { accent-color: var(--saffron); }
+.note { font-size: var(--fs-xs); color: var(--sand-2); margin: 4px 0 0; }
+.note.warn { color: var(--warn); }
+.modes { display: grid; gap: 6px; }
+.mode { text-align: start; background: var(--ink-2); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; cursor: pointer; display: grid; gap: 1px; }
+.mode b { font-weight: 600; font-size: var(--fs-s); }
+.mode span { font-size: var(--fs-xs); color: var(--sand-2); }
+.mode.on { border-color: var(--saffron); box-shadow: inset 3px 0 0 var(--saffron); }
+[dir=rtl] .mode.on { box-shadow: inset -3px 0 0 var(--saffron); }
+.sub[hidden] { display: none !important; }
+.divider { height: 1px; background: var(--line); margin-block: 12px; }
+
+/* ---------- stage ---------- */
+.stage { display: grid; gap: 14px; min-width: 0; }
+.world-wrap { position: relative; background: #0a1013; border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; aspect-ratio: 3 / 2; max-width: 100%; }
+#world { display: block; width: 100%; height: 100%; cursor: crosshair; }
+.hud { position: absolute; inset-block-start: 10px; inset-inline-start: 10px; max-width: calc(100% - 60px); display: flex; gap: 6px; flex-wrap: wrap; pointer-events: none; }
+.chip { background: rgba(12,19,22,.78); border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; font-size: var(--fs-xs); display: inline-flex; align-items: center; gap: 6px; backdrop-filter: blur(4px); }
+.chip .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.chip.alert { border-color: var(--heat); color: #ffd8c8; }
+.legend { position: absolute; inset-block-end: 10px; inset-inline-start: 10px; display: flex; gap: 6px; flex-wrap: wrap; pointer-events: none; max-width: calc(100% - 20px); }
+.overlay { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(8,12,14,.72); }
+.overlay > div { text-align: center; display: grid; gap: 10px; justify-items: center; padding: 20px; }
+.overlay h3 { font-family: var(--display); font-size: var(--fs-xl); margin: 0; }
+.presets { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; }
+.preset { text-align: start; background: var(--ink-1); border: 1px solid var(--line); border-radius: var(--r); padding: 10px 12px; cursor: pointer; display: grid; gap: 3px; transition: border-color .15s, transform .15s; }
+.preset:hover { border-color: var(--saffron); transform: translateY(-1px); }
+.preset b { font-family: var(--display); font-weight: 500; font-size: var(--fs-m); }
+.preset span { font-size: var(--fs-xs); color: var(--sand-2); }
+.ticker { display: grid; gap: 3px; font-size: var(--fs-s); max-height: 132px; overflow: auto; }
+.ticker div { display: flex; gap: 10px; }
+.ticker time { font-family: var(--mono); color: var(--sand-3); min-width: 74px; font-variant-numeric: tabular-nums; }
+
+/* ---------- semen bank ---------- */
+.canister { display: flex; gap: 5px; flex-wrap: wrap; min-height: 54px; align-items: flex-end; }
+.straw { width: 17px; border-radius: 3px 3px 6px 6px; background: linear-gradient(to top, var(--saffron), #f3d08c); position: relative; cursor: pointer; border: 0; padding: 0; }
+.straw:hover { filter: brightness(1.15); }
+.straw i { position: absolute; inset-block-start: -2px; inset-inline: 0; height: 5px; border-radius: 3px; background: #c4c9cc; }
+.bank-empty { font-size: var(--fs-xs); color: var(--sand-3); align-self: center; }
+
+/* ---------- charts ---------- */
+canvas.chart { display: block; width: 100%; height: 160px; }
+canvas.chart.tall { height: 230px; }
+.leg { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: var(--fs-xs); color: var(--sand-2); margin-top: 6px; }
+.leg button { background: none; border: 0; padding: 0; cursor: pointer; display: inline-flex; gap: 5px; align-items: center; color: inherit; font-size: inherit; }
+.leg button.off { opacity: .35; }
+.leg i { width: 10px; height: 3px; border-radius: 2px; display: inline-block; }
+.eq { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }
+.eq div { background: var(--ink-2); border-radius: 8px; padding: 6px 8px; display: grid; }
+.eq span { font-size: var(--fs-xs); color: var(--sand-2); }
+.eq b { font-family: var(--mono); font-weight: 500; font-variant-numeric: tabular-nums; font-size: var(--fs-l); }
+.eq b.hl { color: var(--saffron); }
+.formula { font-family: var(--mono); font-size: var(--fs-s); color: var(--sand-2); margin-top: 8px; direction: ltr; text-align: start; }
+
+/* ---------- inspector ---------- */
+.insp-empty { color: var(--sand-2); font-size: var(--fs-s); }
+.idline { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 8px; }
+.pill { font-size: var(--fs-xs); padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); background: var(--ink-2); }
+.pill.f { border-color: var(--female); color: var(--female); }
+.pill.m { border-color: var(--male); color: var(--male); }
+.pill.hot { border-color: var(--t4); color: var(--t4); }
+.pill.gold { border-color: var(--saffron); color: var(--saffron); }
+.kv { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; font-size: var(--fs-s); }
+.kv dt { color: var(--sand-2); }
+.kv dd { margin: 0; font-family: var(--mono); font-variant-numeric: tabular-nums; unicode-bidi: plaintext; text-align: start; }
+.link { background: none; border: 0; color: var(--saffron); cursor: pointer; padding: 0; font-family: var(--mono); text-decoration: underline; text-underline-offset: 2px; }
+.traits { width: 100%; border-collapse: collapse; font-size: var(--fs-s); margin-top: 10px; }
+.traits th { font-weight: 400; color: var(--sand-2); text-align: start; font-size: var(--fs-xs); padding: 3px 4px; border-bottom: 1px solid var(--line); }
+.traits td { padding: 3px 4px; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.traits td:first-child { font-family: var(--body); }
+.traits .sw { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-inline-end: 6px; }
+.ebar { height: 5px; background: var(--ink-2); border-radius: 3px; overflow: hidden; margin-top: 2px; }
+.ebar i { display: block; height: 100%; background: var(--leaf); }
+#genome { width: 100%; height: 210px; display: block; }
+.insp-grid { display: grid; gap: 14px; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); align-items: start; }
+@media (max-width: 700px) { .insp-grid { grid-template-columns: minmax(0, 1fr); } #genome { height: 150px; } }
+.gcap { font-size: var(--fs-xs); color: var(--sand-2); margin-top: 4px; }
+
+/* ---------- intro ---------- */
+.intro { background: var(--ink-1); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 16px; margin-bottom: 14px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px 16px; align-items: start; }
+.intro p { margin: 0; color: var(--sand-2); max-width: 110ch; font-size: var(--fs-m); }
+.intro p b { color: var(--sand); font-weight: 600; }
+.foot { margin-top: 18px; color: var(--sand-3); font-size: var(--fs-xs); }
+
+/* ---------- worlds ---------- */
+.worlds { display: flex; gap: 6px; flex-wrap: wrap; margin-inline-start: auto; }
+.worlds button { background: var(--ink-1); border: 1px solid var(--line); border-radius: 10px; padding: 6px 14px; cursor: pointer; text-align: start; display: grid; gap: 0; }
+.worlds button b { font-family: var(--display); font-weight: 500; font-size: var(--fs-l); }
+.worlds button span { font-size: var(--fs-xs); color: var(--sand-2); }
+.worlds button.on { border-color: var(--saffron); background: var(--ink-2); box-shadow: inset 0 -2px 0 var(--saffron); }
+body:not([data-world="herd"]) #world-herd, body:not([data-world="origins"]) #world-origins, body:not([data-world="column"]) #world-column, body:not([data-world="obs"]) #world-obs { display: none; }
+.subbar { display: flex; flex-wrap: wrap; gap: 12px 22px; align-items: center; margin-bottom: 14px; }
+.subbar .clock { margin-inline-start: 0; }
+.subbar .transport { margin-inline-start: auto; }
+.toggle { display: flex; gap: 10px; align-items: flex-start; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--ink-2); margin-block: 8px; cursor: pointer; }
+.toggle input { accent-color: var(--saffron); margin-top: 4px; }
+.toggle b { display: block; font-size: var(--fs-s); font-weight: 600; }
+.toggle small { display: block; color: var(--sand-2); font-size: var(--fs-xs); }
+.scope-wrap { background: #03070a; }
+.tank-wrap { aspect-ratio: 2 / 1; background: #041016; }
+#tank { display: block; width: 100%; height: 100%; cursor: grab; touch-action: none; }
+#tank:active { cursor: grabbing; }
+#cMini { width: min(100%, 300px); margin-inline: auto; aspect-ratio: 1 / 1; max-width: 100%; display: block; border-radius: 8px; border: 1px solid var(--line); }
+#cLin { width: 100%; height: 72px; display: block; margin-top: 10px; }
+#scope { display: block; width: 100%; height: 100%; cursor: grab; touch-action: none; }
+#scope:active { cursor: grabbing; }
+.zoom { position: absolute; inset-block-start: 10px; inset-inline-end: 10px; display: flex; flex-direction: column; gap: 4px; }
+.zoom button { width: 30px; height: 30px; border-radius: 8px; background: rgba(12,19,22,.8); border: 1px solid var(--line); cursor: pointer; color: var(--sand); font-size: 15px; line-height: 1; }
+@media (max-width: 600px) { .hint { display: none; } }
+.hint { position: absolute; inset-block-end: 8px; inset-inline: 0; margin: 0; text-align: center; font-size: var(--fs-xs); color: rgba(235,223,196,.45); pointer-events: none; }
+.genes { display: grid; gap: 5px; margin-top: 10px; }
+.gene { display: grid; grid-template-columns: minmax(7em, 10em) minmax(0, 1fr) 3.2em; gap: 8px; align-items: center; font-size: var(--fs-xs); color: var(--sand-2); }
+.gene i { height: 6px; background: var(--ink-2); border-radius: 3px; overflow: hidden; display: block; }
+.gene i b { display: block; height: 100%; }
+.gene em { font-style: normal; text-align: end; color: var(--sand); }
+#oMini { width: min(100%, 300px); margin-inline: auto; aspect-ratio: 1 / 1; max-width: 100%; display: block; border-radius: 8px; border: 1px solid var(--line); }
+#oLin { width: 100%; height: 72px; display: block; margin-top: 10px; }
+.ticker div.ms span { color: var(--saffron); }
+.ticker div.ms time { color: var(--saffron); opacity: .7; }
+
+/* ---------- observatory ---------- */
+.obs-grid { display: grid; gap: 14px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.obs-grid .span2 { grid-column: 1 / -1; }
+@media (max-width: 860px) { .obs-grid { grid-template-columns: minmax(0, 1fr); } }
+.ladder { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.ladder li { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; padding: 6px 10px; border-radius: 8px; background: var(--ink-2); font-size: var(--fs-s); color: var(--sand-3); border-inline-start: 3px solid var(--line); }
+.ladder li.on { color: var(--sand); border-inline-start-color: var(--leaf); }
+.ladder li em { font-style: normal; font-size: var(--fs-xs); color: var(--sand-3); text-align: end; }
+.ladder li.on em { color: var(--leaf); }
+.ladder li.ceiling { background: none; border: 0; border-top: 1px dashed var(--heat); border-radius: 0; color: var(--heat); padding-top: 10px; margin-top: 4px; font-size: var(--fs-xs); }
+.ladder li.locked { opacity: .55; }
+.fossils { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
+.fossil { margin: 0; background: var(--ink-2); border-radius: 8px; padding: 6px; display: grid; gap: 4px; }
+.fossil canvas { width: 100%; aspect-ratio: 1 / 1; display: block; border-radius: 6px; }
+.fossil figcaption { display: grid; font-size: var(--fs-xs); color: var(--sand-2); }
+.laws { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+.law { background: var(--ink-2); border-radius: 10px; padding: 10px 12px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.law header { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.law h3 { margin: 0; font-size: var(--fs-m); font-weight: 600; line-height: 1.45; text-wrap: balance; }
+.law canvas.lawc { width: 100%; height: 150px; display: block; }
+.law .eq { margin-top: 0; }
+.law .eq div { background: var(--ink-1); }
+.pill.good { border-color: var(--good); color: var(--good); }
+.pill.bad { border-color: var(--bad); color: var(--bad); }
+.pill.wait { border-color: var(--sand-3); color: var(--sand-2); }
+.ticker div.ms span { color: var(--sand); }
+@media (prefers-reduced-motion: reduce) { .preset, .btn { transition: none; } }
+</style>
+
+<header class="bar">
+  <div class="brand">
+    <h1><span data-i18n="title">جينيسيس</span><span class="lat">GENESIS</span></h1>
+    <p data-i18n="tagline">مختبر حيّ للتطور: من الخلية الأولى إلى برامج التربية.</p>
+  </div>
+  <nav class="worlds" id="worlds" aria-label="worlds">
+    <button data-world="obs"><b data-i18n="w_obs">المرصد</b><span data-i18n="w_obs_d">العالم الأبدي والقوانين</span></button>
+    <button data-world="column"><b data-i18n="w_col">عمود الماء</b><span data-i18n="w_col_d">فيزياء حقيقية وتعدد الخلايا</span></button>
+    <button data-world="origins"><b data-i18n="w_or">الأصول</b><span data-i18n="w_or_d">من الخلية إلى الكائن</span></button>
+    <button data-world="herd"><b data-i18n="w_herd">القطيع</b><span data-i18n="w_herd_d">الوراثة الكمية والتربية</span></button>
+  </nav>
+  <button class="btn" id="lang">English</button>
+</header>
+
+<section class="world" id="world-herd">
+  <div class="subbar">
+  <div class="clock">
+    <div><b id="cYear">1</b><span data-i18n="year">السنة</span></div>
+    <div><b id="cSeason">—</b><span data-i18n="season">الموسم</span></div>
+    <div><b id="cTemp">30°</b><span data-i18n="temp">الحرارة</span></div>
+    <div><b id="cGen">0.0</b><span data-i18n="gen">متوسط الجيل</span></div>
+    <div><b id="cPop">0</b><span data-i18n="pop">حجم القطيع</span></div>
+  </div>
+    <div class="transport">
+      <button class="btn play on" id="play" data-i18n="pause">إيقاف مؤقت</button>
+      <div class="seg" id="speed" role="group" aria-label="speed">
+        <button data-v="1">1×</button><button data-v="4" class="on">4×</button><button data-v="12">12×</button><button data-v="30">30×</button>
+      </div>
+    </div>
+  </div>
+<section class="intro" id="intro">
+  <p data-i18n-html="intro">كل كائن هنا يحمل <b>جينومًا ثنائي الصيغة</b> من 48 موقعًا جينيًا لست صفات، و<b>دماغًا عصبيًا</b> يُورَّث ويتطوّر. الإناث تمرّ بـ<b>دورة شبق</b> وحمل وولادة، والجوع يوقف الشبق، والحرارة تخفض الخصوبة. لا شيء مكتوب مسبقًا: الانتخاب الطبيعي أو برنامجك التربوي هو ما يغيّر القطيع. المعادلات على اليمين تُحسب من البيانات الحية، ويمكنك مقارنة المكافئ الوراثي المقدَّر بالقيمة الحقيقية المعروفة من الجينوم.</p>
+  <button class="btn" id="introClose" data-i18n="hide">إخفاء</button>
+</section>
+
+<main class="lab">
+  <!-- ============ CONTROLS ============ -->
+  <aside class="col controls">
+    <section class="panel">
+      <h2><span data-i18n="program">برنامج التربية</span></h2>
+      <div class="modes" id="modes">
+        <button class="mode on" data-mode="natural"><b data-i18n="m_nat">الطبيعة وحدها</b><span data-i18n="m_nat_d">تزاوج حر، والبقاء للأصلح</span></button>
+        <button class="mode" data-mode="selective"><b data-i18n="m_sel">تزاوج طبيعي انتخابي</b><span data-i18n="m_sel_d">فقط الذكور المنتخبة تُلقّح بالتزاوج</span></button>
+        <button class="mode" data-mode="ai"><b data-i18n="m_ai">برنامج تلقيح اصطناعي</b><span data-i18n="m_ai_d">بنك سائل منوي مجمّد من نخبة الطلائق</span></button>
+      </div>
+      <div class="sub" id="selBox" hidden>
+        <div class="ctl">
+          <span class="lbl" data-i18n="target">الصفة المستهدفة</span>
+          <div class="row"><select id="target"></select>
+            <div class="seg" id="dir"><button data-v="1" class="on">▲</button><button data-v="-1">▼</button></div></div>
+        </div>
+        <div class="ctl">
+          <span class="lbl" data-i18n="criterion">معيار الانتخاب</span>
+          <div class="seg" id="crit"><button data-v="pheno" class="on" data-i18n="pheno">المظهر</button><button data-v="genomic" data-i18n="genomic">التقييم الجينومي</button></div>
+        </div>
+        <div class="ctl sub" id="accBox" hidden>
+          <label for="acc"><span data-i18n="acc">دقة التقييم الجينومي r</span><output id="accO">0.70</output></label>
+          <input type="range" id="acc" min="0.3" max="0.99" step="0.01" value="0.7">
+        </div>
+        <div class="ctl">
+          <label for="sire"><span data-i18n="sire">نسبة الطلائق المنتخبة</span><output id="sireO">10%</output></label>
+          <input type="range" id="sire" min="0.02" max="0.5" step="0.01" value="0.1">
+          <p class="note warn" id="sireWarn" hidden data-i18n="sireWarn">عدد قليل جدًا من الطلائق لا يكفي لتغطية القطيع بالتزاوج الطبيعي. هذا بالضبط ما يحلّه التلقيح الاصطناعي.</p>
+        </div>
+        <div class="ctl">
+          <label for="dam"><span data-i18n="dam">نسبة الإناث المستبقاة للتربية</span><output id="damO">100%</output></label>
+          <input type="range" id="dam" min="0.3" max="1" step="0.05" value="1">
+        </div>
+        <div class="sub" id="aiBox" hidden>
+          <div class="ctl">
+            <label for="heat"><span data-i18n="heatDet">كفاءة اكتشاف الشبق</span><output id="heatO">70%</output></label>
+            <input type="range" id="heat" min="0.2" max="1" step="0.05" value="0.7">
+          </div>
+          <div class="ctl">
+            <label for="bank"><span data-i18n="bankSize">عدد الطلائق في البنك</span><output id="bankO">10</output></label>
+            <input type="range" id="bank" min="1" max="30" step="1" value="10">
+          </div>
+          <span class="lbl note" data-i18n="canister">الحاوية: قصبات السائل المنوي المجمّد (اضغط لعرض الطلوقة)</span>
+          <div class="canister" id="canister"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2><span data-i18n="env">البيئة</span></h2>
+      <div class="ctl">
+        <label for="tempR"><span data-i18n="meanTemp">متوسط الحرارة السنوي</span><output id="tempO">30°C</output></label>
+        <input type="range" id="tempR" min="20" max="42" step="1" value="30">
+      </div>
+      <div class="ctl">
+        <label for="foodR"><span data-i18n="food">وفرة المرعى</span><output id="foodO">100%</output></label>
+        <input type="range" id="foodR" min="0.4" max="1.6" step="0.05" value="1">
+      </div>
+      <div class="ctl">
+        <label for="mutR"><span data-i18n="mut">معدل الطفرات لكل أليل</span><output id="mutO">0.003</output></label>
+        <input type="range" id="mutR" min="0" max="0.02" step="0.001" value="0.003">
+      </div>
+      <label class="check"><input type="checkbox" id="inb" checked> <span data-i18n="inbDep">تدهور التربية الداخلية (تكلفة أيضية لكل موقع متماثل)</span></label>
+      <div class="divider"></div>
+      <div class="row">
+        <button class="btn" id="drought" data-i18n="drought">موجة جفاف</button>
+        <button class="btn" id="bottle" data-i18n="bottle">عنق الزجاجة (16 فردًا)</button>
+      </div>
+      <div class="divider"></div>
+      <div class="ctl">
+        <span class="lbl" data-i18n="colorBy">تلوين الكائنات حسب</span>
+        <select id="colorBy">
+          <option value="sex" data-i18n="cb_sex">الجنس والحالة التناسلية</option>
+          <option value="bv" data-i18n="cb_bv">القيمة التربوية للصفة المستهدفة</option>
+          <option value="F" data-i18n="cb_F">معامل التربية الداخلية F</option>
+          <option value="gen" data-i18n="cb_gen">رقم الجيل</option>
+        </select>
+      </div>
+      <div class="row">
+        <button class="btn" id="reset" data-i18n="reset">بداية جديدة</button>
+        <span class="note mono" id="seedLbl"></span>
+      </div>
+    </section>
+  </aside>
+
+  <!-- ============ STAGE ============ -->
+  <section class="stage">
+    <div class="world-wrap">
+      <canvas id="world" aria-label="simulation world"></canvas>
+      <div class="hud" id="hud"></div>
+      <div class="legend" id="legend"></div>
+      <div class="overlay" id="extinct" hidden><div><h3 data-i18n="extinctT">انقرض القطيع</h3><p class="note" data-i18n="extinctD">جرّب ظروفًا أرحم أو انتخابًا أقل حدّة.</p><button class="btn on" id="restart" data-i18n="reset">بداية جديدة</button></div></div>
+    </div>
+    <div class="presets" id="presets"></div>
+    <section class="panel" id="inspector">
+      <h2><span data-i18n="insp">بطاقة الحيوان</span></h2>
+      <div class="insp-grid">
+        <div id="insp"><p class="insp-empty" data-i18n="inspEmpty">اضغط على أي كائن في العالم لعرض جينومه ونسبه وقيمه التربوية.</p></div>
+        <div class="gbox">
+          <canvas id="genome" hidden></canvas>
+          <p class="gcap" id="gcap" hidden data-i18n="gcap">كل عمود موقع جيني: النصف العلوي أليل الأم والسفلي أليل الأب. الإطار الذهبي = موقع متماثل بالنسب (IBD).</p>
+        </div>
+      </div>
+    </section>
+    <section class="panel">
+      <h2><span data-i18n="log">سجلّ الأحداث</span></h2>
+      <div class="ticker" id="ticker"></div>
+    </section>
+  </section>
+
+  <!-- ============ ANALYTICS ============ -->
+  <aside class="col analytics">
+    <section class="panel">
+      <h2><span data-i18n="galton">انحدار النسل على متوسط الأبوين</span><small data-i18n="galtonS">أسلوب غالتون</small></h2>
+      <div class="row"><select id="gTrait"></select></div>
+      <canvas class="chart tall" id="cGalton"></canvas>
+      <div class="eq">
+        <div><span data-i18n="h2est">h² المقدَّر (الميل)</span><b id="eH2e" class="hl">—</b></div>
+        <div><span data-i18n="h2true">h² الحقيقي (الجينوم)</span><b id="eH2t">—</b></div>
+        <div><span data-i18n="nRec">عدد المواليد</span><b id="eN">—</b></div>
+        <div><span data-i18n="S">فارق الانتخاب S</span><b id="eS">—</b></div>
+        <div><span data-i18n="Rp">الاستجابة المتوقعة</span><b id="eRp">—</b></div>
+        <div><span data-i18n="Rr">الاستجابة المحققة</span><b id="eRr" class="hl">—</b></div>
+      </div>
+      <div class="formula" id="formula">R = h² · S</div>
+    </section>
+    <section class="panel">
+      <h2><span data-i18n="trend">الاتجاه الوراثي</span><small data-i18n="trendS">متوسط القيمة التربوية بوحدات الانحراف المعياري</small></h2>
+      <canvas class="chart" id="cTrend"></canvas>
+      <div class="leg" id="trendLeg"></div>
+    </section>
+    <section class="panel">
+      <h2><span data-i18n="popT">القطيع</span><small data-i18n="popS">الحجم، الإناث، الحوامل</small></h2>
+      <canvas class="chart" id="cPopC"></canvas>
+      <div class="leg" id="popLeg"></div>
+    </section>
+    <section class="panel">
+      <h2><span data-i18n="inbT">التربية الداخلية والتباين</span><small data-i18n="inbS">F و h² للصفة المستهدفة</small></h2>
+      <canvas class="chart" id="cInb"></canvas>
+      <div class="leg" id="inbLeg"></div>
+    </section>
+
+  </aside>
+</main>
+<p class="foot" data-i18n="foot">النموذج: وراثة إضافية متعددة الجينات (8 مواقع لكل صفة)، انعزال مندلي مستقل، طفرات، مكافئات وراثية أولية: الحجم 0.45، السرعة 0.35، الرؤية 0.30، تحمل الحرارة 0.30، الخصوبة 0.10، الكفاءة الغذائية 0.25.</p>
+</section>
+
+<!--@@OBS_HTML@@-->
+<!--@@COLUMN_HTML@@-->
+<!--@@ORIGINS_HTML@@-->
+
+<script>
+/*@@WORLDS@@*/
+</script>
+<script>
+/*@@CORE@@*/
+</script>
+<script>
+/*@@UI@@*/
+</script>
+<script>
+/*@@ORIGINS@@*/
+</script>
+<script>
+/*@@OUI@@*/
+</script>
+<script>
+/*@@COLUMN@@*/
+</script>
+<script>
+/*@@CUI@@*/
+</script>
+<script>
+/*@@BUI@@*/
+</script>

@@ -1,0 +1,127 @@
+<section class="world" id="world-origins">
+  <div class="subbar">
+    <div class="clock">
+      <div><b id="oHours">0</b><span data-o18n="hours">ساعة</span></div>
+      <div><b id="oGens">0</b><span data-o18n="gens">جيل خلوي</span></div>
+      <div><b id="oCells">0</b><span data-o18n="cells">خلية</span></div>
+      <div><b id="oCols">0</b><span data-o18n="o_multiCols">كائن متعدد الخلايا</span></div>
+      <div><b id="oInG">0%</b><span data-o18n="inGroups">في مجموعات</span></div>
+      <div><b id="oPreds">0</b><span data-o18n="predators">مفترس</span></div>
+    </div>
+    <div class="transport">
+      <button class="btn play on" id="oPlay">إيقاف مؤقت</button>
+      <div class="seg" id="oSpeed" role="group" aria-label="speed">
+        <button data-v="1">1×</button><button data-v="4" class="on">4×</button><button data-v="10">10×</button><button data-v="24">24×</button>
+      </div>
+    </div>
+  </div>
+
+  <section class="intro" id="oIntro">
+    <p data-o18n-html="o_intro"></p>
+    <button class="btn" id="oIntroClose" data-i18n="hide">إخفاء</button>
+  </section>
+
+  <main class="lab">
+    <aside class="col controls">
+      <section class="panel">
+        <h2><span data-o18n="forces">قوى الانتخاب</span></h2>
+        <label class="toggle" for="oPred"><input type="checkbox" id="oPred" checked><span><b data-o18n="o_pred">مفترسات محدودة الفم</b><small data-o18n="o_pred_d"></small></span></label>
+        <label class="toggle" for="oAggr"><input type="checkbox" id="oAggr"><span><b data-o18n="o_aggr">الالتحام بالغرباء</b><small data-o18n="o_aggr_d"></small></span></label>
+        <div class="ctl">
+          <span class="lbl" data-o18n="lifecycle">دورة الحياة</span>
+          <div class="seg" id="oLife"><button data-v="free" class="on" data-o18n="lc_free">تتطور</button><button data-v="single" data-o18n="lc_single">خلية واحدة</button><button data-v="chunk" data-o18n="lc_chunk">تفتّت</button></div>
+        </div>
+      </section>
+      <section class="panel">
+        <h2><span data-o18n="o_env">البيئة</span></h2>
+        <div class="ctl"><label for="oSimple"><span data-o18n="o_simple"></span><output id="oSimpleO"></output></label><input type="range" id="oSimple" min="0.4" max="2" step="0.05" value="1"></div>
+        <div class="ctl"><label for="oPoly"><span data-o18n="o_poly"></span><output id="oPolyO"></output></label><input type="range" id="oPoly" min="0" max="2" step="0.05" value="1"></div>
+        <div class="ctl"><label for="oPatch"><span data-o18n="o_patch"></span><output id="oPatchO"></output></label><input type="range" id="oPatch" min="0" max="4" step="0.1" value="1"></div>
+        <div class="ctl"><label for="oCost"><span data-o18n="o_cost"></span><output id="oCostO"></output></label><input type="range" id="oCost" min="0" max="0.012" step="0.0005" value="0.0042"></div>
+        <div class="ctl"><label for="oMut"><span data-o18n="o_mut"></span><output id="oMutO"></output></label><input type="range" id="oMut" min="0" max="0.2" step="0.01" value="0.08"></div>
+        <div class="divider"></div>
+        <h2><span data-o18n="o_actions">تدخلات</span></h2>
+        <div class="row"><button class="btn" id="oBig" data-o18n="o_big"></button><button class="btn" id="oPlague" data-o18n="o_plague"></button></div>
+        <div class="divider"></div>
+        <div class="ctl">
+          <span class="lbl" data-o18n="o_color">التلوين</span>
+          <select id="oColor">
+            <option value="lin" data-o18n="cb_lin"></option>
+            <option value="type" data-o18n="cb_type"></option>
+            <option value="secr" data-o18n="cb_secr"></option>
+            <option value="adh" data-o18n="cb_adh"></option>
+          </select>
+        </div>
+        <div class="row"><button class="btn" id="oReset" data-o18n="o_reset"></button><span class="note mono" id="oSeed"></span></div>
+      </section>
+    </aside>
+
+    <section class="stage">
+      <div class="world-wrap scope-wrap">
+        <canvas id="scope" aria-label="microscope view"></canvas>
+        <div class="hud" id="oHud"></div>
+        <div class="zoom"><button id="oZin" aria-label="zoom in">+</button><button id="oZout" aria-label="zoom out">−</button><button id="oZreset" aria-label="reset view">⟲</button></div>
+        <p class="hint" data-o18n="o_hint"></p>
+        <div class="overlay" id="oExtinct" hidden><div><h3 data-i18n="extinctT">انقرض القطيع</h3><button class="btn on" id="oRestart" data-o18n="o_reset">قطرة جديدة</button></div></div>
+      </div>
+      <div class="presets" id="oPresets"></div>
+      <section class="panel">
+        <h2><span data-o18n="o_card">بطاقة الكائن</span></h2>
+        <div class="insp-grid">
+          <div>
+            <div id="oCard"></div>
+            <div class="row" id="oCardTools" hidden style="margin-top:10px"><button class="btn" id="oFollow"></button><button class="btn" id="oZoomTo" data-o18n="o_zoomto"></button></div>
+          </div>
+          <div class="gbox">
+            <canvas id="oMini" hidden></canvas>
+            <canvas id="oLin" hidden></canvas>
+            <p class="gcap" id="oLinCap" hidden data-o18n="o_lineage"></p>
+          </div>
+        </div>
+      </section>
+      <section class="panel">
+        <h2><span data-o18n="log">سجلّ الأحداث</span></h2>
+        <div class="ticker" id="oTicker"></div>
+      </section>
+    </section>
+
+    <aside class="col analytics">
+      <section class="panel">
+        <h2><span data-o18n="o_river">نهر الأشكال</span><small data-o18n="o_river_s"></small></h2>
+        <canvas class="chart tall" id="oRiver"></canvas>
+        <div class="leg" id="oRiverLeg"></div>
+      </section>
+      <section class="panel">
+        <h2><span data-o18n="o_price">معادلة برايس</span><small data-o18n="o_price_s"></small></h2>
+        <canvas class="chart" id="oPrice"></canvas>
+        <div class="leg" id="oPriceLeg"></div>
+        <div class="eq">
+          <div><span data-o18n="o_between"></span><b id="oPB">—</b></div>
+          <div><span data-o18n="o_within"></span><b id="oPW">—</b></div>
+          <div><span data-o18n="o_rel"></span><b id="oPR" class="hl">—</b></div>
+        </div>
+        <div class="formula">w̄Δz̄ = Cov<sub>between</sub>(W,Z) + E[Cov<sub>within</sub>(w,z)] + E(wΔz)</div>
+      </section>
+      <section class="panel">
+        <h2><span data-o18n="o_galton">توريث حجم الكائن</span><small data-o18n="o_galton_s"></small></h2>
+        <canvas class="chart tall" id="oGalton"></canvas>
+        <div class="eq">
+          <div><span data-o18n="o_slope"></span><b id="oSlope" class="hl">—</b></div>
+          <div><span data-o18n="o_pairs"></span><b id="oPairs">—</b></div>
+          <div><span data-o18n="o_meanS"></span><b id="oMeanS">—</b></div>
+        </div>
+      </section>
+      <section class="panel">
+        <h2><span data-o18n="o_arms">سباق التسلح</span><small data-o18n="o_arms_s"></small></h2>
+        <canvas class="chart" id="oArms"></canvas>
+        <div class="leg" id="oArmsLeg"></div>
+      </section>
+      <section class="panel">
+        <h2><span data-o18n="o_genes">الجينات</span><small data-o18n="o_genes_s"></small></h2>
+        <canvas class="chart" id="oGenes"></canvas>
+        <div class="leg" id="oGenesLeg"></div>
+      </section>
+    </aside>
+  </main>
+  <p class="foot" data-o18n="o_footer"></p>
+</section>
