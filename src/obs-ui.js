@@ -304,7 +304,7 @@ function renderLaws() {
     let body = '';
     if (law.pts !== undefined) {
       const f = law.fit;
-      body = `<canvas class="lawc" data-l="${i}"></canvas><p class="note">${(LAW_EXTRA[law.id] || {})[lang()] || ''}${f ? ` · ${t('fitk')} ${f.k} ± ${f.se} · ${t('r2')} ${f.r2} · n ${f.n}` : ''}${law.threshold ? ` · ${t('threshold')} ≈ ${(law.threshold / 1e6).toFixed(1)}M/mL` : ''}</p>`;
+      body = `<canvas class="lawc" data-l="${i}"></canvas><p class="note">${(LAW_EXTRA[law.id] || {})[lang()] || ''}${f ? ` · ${t('fitk')} <bdi dir="ltr" class="mono">${f.k} ± ${f.se}</bdi> · ${t('r2')} <bdi dir="ltr" class="mono">${f.r2}</bdi> · n <bdi class="mono">${f.n}</bdi>` : ''}${law.threshold ? ` · ${t('threshold')} ≈ <bdi dir="ltr" class="mono">${(law.threshold / 1e6).toFixed(1)}M/mL</bdi>` : ''}</p>`;
     } else if (law.id === 'predation') {
       body = `<div class="eq"><div><span>${t('withP')}</span><b>${law.withPred.frac === null ? '—' : Math.round(law.withPred.frac * 100) + '%'}</b><span class="mono">n ${law.withPred.n}</span></div><div><span>${t('withoutP')}</span><b>${law.without.frac === null ? '—' : Math.round(law.without.frac * 100) + '%'}</b><span class="mono">n ${law.without.n}</span></div></div>`;
     } else if (law.id === 'redqueen') {

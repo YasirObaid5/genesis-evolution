@@ -84,7 +84,7 @@ const EXP = {
     }
     let acc = 0, k = 0;
     for (let i = 0; i < 900; i++) { s.step(); if (i >= 300) { acc += s.flowStats.rms; k++; } }
-    const conc = N / (Col.LX * Col.LZ * Col.HSL) * 1e12 / 1e3;   // cells per mL
+    const conc = N / (Col.LX * Col.LZ * Col.HSL) * 1e12;   // cells per mL (1 mL = 1e12 µm³)
     return { seed, N, conc: Math.round(conc), rms: +(acc / k).toFixed(2) };
   },
   // L5 + L6: size-selective predation and multicellularity; the Red Queen collapse
