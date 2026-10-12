@@ -1171,22 +1171,22 @@ Paste this together with this file:
 
 ## 20. References
 
-Scientific background used in the design:
+Scientific background used in the design. APA 7th edition, all DOIs checked against Crossref on 2026-10-12.
 
 - Pedley, T. J., & Kessler, J. O. (1992). Hydrodynamic phenomena in suspensions of swimming microorganisms. *Annual Review of Fluid Mechanics, 24*, 313–358. https://doi.org/10.1146/annurev.fl.24.010192.001525
-- Pedley, T. J., Hill, N. A., & Kessler, J. O. (1988). The growth of bioconvection patterns in a uniform suspension of gyrotactic micro-organisms. *Journal of Fluid Mechanics, 195*, 223–237.
-- Bees, M. A., & Hill, N. A. (1997). Wavelengths of bioconvection patterns. *Journal of Experimental Biology, 200*, 1515–1526.
-- Jeffery, G. B. (1922). The motion of ellipsoidal particles immersed in a viscous fluid. *Proceedings of the Royal Society A, 102*, 161–179.
+- Pedley, T. J., Hill, N. A., & Kessler, J. O. (1988). The growth of bioconvection patterns in a uniform suspension of gyrotactic micro-organisms. *Journal of Fluid Mechanics, 195*, 223–237. https://doi.org/10.1017/S0022112088002393
+- Bees, M. A., & Hill, N. A. (1997). Wavelengths of bioconvection patterns. *Journal of Experimental Biology, 200*(10), 1515–1526. https://doi.org/10.1242/jeb.200.10.1515
+- Jeffery, G. B. (1922). The motion of ellipsoidal particles immersed in a viscous fluid. *Proceedings of the Royal Society A, 102*(715), 161–179. https://doi.org/10.1098/rspa.1922.0078
 - Ratcliff, W. C., Denison, R. F., Borrello, M., & Travisano, M. (2012). Experimental evolution of multicellularity. *PNAS, 109*(5), 1595–1600. https://doi.org/10.1073/pnas.1115323109
 - Bozdag, G. O., et al. (2023). De novo evolution of macroscopic multicellularity. *Nature, 617*, 747–754. https://doi.org/10.1038/s41586-023-06052-1
 - Pineau, R. M., et al. (2024). Experimental evolution of multicellularity via cuboidal cell packing in fission yeast. *Evolution Letters, 8*(5), 695–704. https://doi.org/10.1093/evlett/qrae024
-- Herron, M. D., et al. (2019). De novo origins of multicellularity in response to predation. *Scientific Reports, 9*, 2328.
-- Boraas, M. E., Seale, D. B., & Boxhorn, J. E. (1998). Phagotrophy by a flagellate selects for colonial prey: a possible origin of multicellularity. *Evolutionary Ecology, 12*, 153–164.
-- Price, G. R. (1970). Selection and covariance. *Nature, 227*, 520–521.
-- Falconer, D. S., & Mackay, T. F. C. (1996). *Introduction to Quantitative Genetics* (4th ed.). Longman.
-- Robertson, A. (1961). Inbreeding in artificial selection programmes. *Genetical Research, 2*, 189–194.
-- Wray, N. R., & Thompson, R. (1990). Prediction of rates of inbreeding in selected populations. *Genetical Research, 55*, 41–54.
-- Meuwissen, T. H. E., Hayes, B. J., & Goddard, M. E. (2001). Prediction of total genetic value using genome-wide dense marker maps. *Genetics, 157*, 1819–1829.
-- Grimm, V., et al. (2020). The ODD protocol for describing agent-based and other simulation models: a second update to improve clarity, replication, and structural realism. *Journal of Artificial Societies and Social Simulation, 23*(2), 7.
+- Herron, M. D., et al. (2019). De novo origins of multicellularity in response to predation. *Scientific Reports, 9*, Article 2328. https://doi.org/10.1038/s41598-019-39558-8
+- Boraas, M. E., Seale, D. B., & Boxhorn, J. E. (1998). Phagotrophy by a flagellate selects for colonial prey: a possible origin of multicellularity. *Evolutionary Ecology, 12*, 153–164. https://doi.org/10.1023/A:1006527528063
+- Price, G. R. (1970). Selection and covariance. *Nature, 227*, 520–521. https://doi.org/10.1038/227520a0
+- Falconer, D. S., & Mackay, T. F. C. (1996). *Introduction to Quantitative Genetics* (4th ed.). Longman. ISBN 978-0-582-24302-6
+- Robertson, A. (1961). Inbreeding in artificial selection programmes. *Genetical Research, 2*(2), 189–194. https://doi.org/10.1017/S0016672300000690
+- Wray, N. R., & Thompson, R. (1990). Prediction of rates of inbreeding in selected populations. *Genetical Research, 55*(1), 41–54. https://doi.org/10.1017/S0016672300025180
+- Meuwissen, T. H. E., Hayes, B. J., & Goddard, M. E. (2001). Prediction of total genetic value using genome-wide dense marker maps. *Genetics, 157*(4), 1819–1829. https://doi.org/10.1093/genetics/157.4.1819
+- Grimm, V., et al. (2020). The ODD protocol for describing agent-based and other simulation models: a second update to improve clarity, replication, and structural realism. *Journal of Artificial Societies and Social Simulation, 23*(2), 7. https://doi.org/10.18564/jasss.4259
 
 *End of handoff.*
