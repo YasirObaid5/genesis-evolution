@@ -225,6 +225,7 @@ body:not([data-world="herd"]) #world-herd, body:not([data-world="origins"]) #wor
 .pill.wait { border-color: var(--sand-3); color: var(--sand-2); }
 .ticker div.ms span { color: var(--sand); }
 @media (prefers-reduced-motion: reduce) { .preset, .btn { transition: none; } }
+/*@@EXPERIMENT_CSS@@*/
 </style>
 
 <header class="bar">
@@ -428,8 +429,17 @@ body:not([data-world="herd"]) #world-herd, body:not([data-world="origins"]) #wor
 <script>
 /*@@OUI@@*/
 </script>
-<script>
+<script id="column-engine">
 /*@@COLUMN@@*/
+</script>
+<script id="experiment-engine">
+/*@@EXPERIMENTS@@*/
+</script>
+<script id="experiment-worker" type="text/plain">
+/*@@EXPERIMENT_WORKER@@*/
+</script>
+<script>
+/*@@EXPERIMENT_UI@@*/
 </script>
 <script>
 /*@@CUI@@*/

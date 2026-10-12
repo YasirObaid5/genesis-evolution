@@ -1,0 +1,35 @@
+<details class="panel experiment-lab" id="xLab">
+  <summary><span data-x18n="title">ماذا لو أعدنا شريط الحياة؟</span><small data-x18n="subtitle">تجربتان · بداية واحدة · عامل مختلف</small></summary>
+  <p class="x-intro" data-x18n="intro"></p>
+  <form id="xForm">
+    <fieldset id="xSettings" class="x-settings">
+      <legend class="x-sr" data-x18n="settings"></legend>
+      <label for="xFactor"><span data-x18n="factor"></span><select id="xFactor"><option value="predators" data-x18n="predators"></option><option value="flow" data-x18n="flow"></option><option value="source" data-x18n="source"></option><option value="light" data-x18n="light"></option></select></label>
+      <label for="xSeed"><span data-x18n="seed"></span><input id="xSeed" type="number" min="1" max="2147483646" step="1" value="777" required dir="ltr"></label>
+      <label for="xRepeats"><span data-x18n="repeats"></span><input id="xRepeats" type="number" min="1" max="12" step="1" value="3" required dir="ltr"></label>
+      <label for="xSteps"><span data-x18n="steps"></span><input id="xSteps" type="number" min="100" max="36000" step="100" value="5000" required dir="ltr"></label>
+    </fieldset>
+    <p id="xConditions" class="x-conditions"></p>
+    <p class="note" data-x18n="protocol"></p>
+    <div class="x-actions"><button class="btn on" id="xRun" type="submit" data-x18n="run"></button><button class="btn" id="xCancel" type="button" disabled data-x18n="cancel"></button></div>
+  </form>
+  <progress id="xProgress" max="1" value="0" aria-label="Experiment progress"></progress>
+  <p id="xStatus" role="status" aria-live="polite"></p>
+  <section id="xResults" hidden aria-labelledby="xResultTitle">
+    <h2 id="xResultTitle" data-x18n="results"></h2>
+    <p class="note" id="xResultConfig"></p>
+    <div class="x-metrics" id="xMetrics"></div>
+    <div class="x-chart-head"><h3 data-x18n="trajectory"></h3><div id="xLegend" class="leg"></div></div>
+    <svg id="xChart" viewBox="0 0 760 230" role="img" aria-labelledby="xChartTitle"></svg>
+    <p class="note" data-x18n="chartNote"></p>
+    <details class="x-table-wrap"><summary data-x18n="individual"></summary><table><caption id="xTableCaption"></caption><thead id="xTableHead"></thead><tbody id="xTableBody"></tbody></table></details>
+    <p class="note" id="xInterpretation"></p>
+    <label class="x-notes" for="xNotes"><span data-x18n="notes"></span><textarea id="xNotes" maxlength="1000" rows="2"></textarea></label>
+    <div class="x-actions"><button class="btn on" id="xSave" type="button" disabled data-x18n="save"></button><button class="btn" id="xCSV" type="button" disabled data-x18n="csv"></button><button class="btn" id="xJSON" type="button" disabled data-x18n="json"></button></div>
+  </section>
+  <div class="divider"></div>
+  <h2 data-x18n="notebook"></h2>
+  <p class="note" data-x18n="local"></p>
+  <p id="xNotebookStatus" role="status" aria-live="polite"></p>
+  <div id="xNotebook" class="x-notebook"></div>
+</details>

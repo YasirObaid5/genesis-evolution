@@ -1,13 +1,67 @@
 # GENESIS: Handoff Document
 
-**Purpose.** This file gives a new engineer or AI assistant (for example ChatGPT) everything needed to understand, run, verify and extend the Genesis project without access to the conversation that produced it.
+**Purpose.** This file gives a new engineer or AI assistant (including Claude and Codex) everything needed to understand, run, verify and extend the Genesis project without access to the conversation that produced it.
 
 **Written:** 2026-10-12, by Claude (Anthropic), for the project owner (GitHub user `YasirObaid5`).
 
-**Status at writing:**
+**Updated:** 2026-10-12, by Codex, after implementing and checking the model-2 first batch. Read the dated handoff below before following the historical results or roadmap.
+
+**Original status at writing (historical, model 1):**
 - The site is live.
 - The perpetual world is running on GitHub Actions.
 - The laws observatory has initial evidence.
+
+**Local revision, 2026-10-12 — model 2.** This bounded first batch implements the four P0 engine corrections (symmetric gape macro-mutations, a prey-size capture window, zero/one predators at low N, mean-reverting climate), paired water-column experiments and a local notebook, and versioned observatory evidence that includes extinct predation runs. The prior scientific results and deployment status in this document are historical; no long scientific replication or live deployment of this revision is claimed. Engineering checks use `npm test`; rebuild with `python build.py` (UTF-8). Snapshot continuation remains approximate. GRNs, lineage revival/museum and multitrait herd selection are not implemented in this batch.
+
+---
+
+## Latest handoff for Claude — 2026-10-12
+
+**ما أنجزه Codex:** نُفذت الدفعة الأولى داخل المشروع الأصلي: تصحيح النموذج والمرصد، وإضافة مقارنة «ماذا لو؟» من البذرة نفسها، والتكرارات والرسوم، ودفتر محلي وتصدير CSV/JSON. لا تكرر هذه الأعمال على أنها مقترحات غير منفذة. النتائج العلمية القديمة تخص النموذج 1؛ اجتياز الاختبارات وتشغيل المقارنة لا يثبتان نتائج علمية للنموذج 2.
+
+**Release status:** the owner has requested publication. Final production URL, source commit/deployment identity and live verification are pending the release check and must be recorded here after confirmation. Until then, the verified scope of this record is the local implementation. Publishing the static website alone does **not** update or execute the GitHub Actions/VPS runners, and does not regenerate `perpetual-data`.
+
+The current release is being prepared through the existing Git `main` integration, including source, runners and documentation. Existing workflow files are preserved; no manual world/laws run is planned as part of publication. Updated runner code takes effect on a subsequent scheduled run. The release checkout is `C:\Users\alshi\.codex\releases\genesis-20261012-model2`; the desktop folder remains the editable project source without `.git`. Remote reference/DOI improvements from main commit `6c8b228de965e09277b509fcd8214043c544df1e` were retained in section 20.
+
+### Implemented files and behavior
+
+| Area | Files | Completed behavior |
+|---|---|---|
+| Evolution engines | `src/column.js`, `src/origins.js` | Export `MODEL_VERSION = '2'`; symmetric positive/negative log-gape macro-mutations. Column additionally has the bounded prey-size capture window, failed-attack handling cost, protection against counting the same prey twice, zero/one predators at low population, and climate mean reversion with reflecting bounds. |
+| Comparison engine | `src/experiments.js` | Validated one-factor A/B comparisons with the same initial algae and RNG state; fixed default baseline; sequential replicate seeds; current-state sampling; extinction-inclusive paired summaries; endpoint CSV export. |
+| Comparison UI and worker | `src/experiments.html`, `src/experiments.css`, `src/experiments-ui.js`, `src/experiments-worker.js` | Arabic/English controls, worker progress/cancel, B−A metrics, trajectory chart and per-replicate table, notes, local notebook, view/rerun/delete, CSV/JSON downloads. Completed pairs remain exportable after cancellation as partial results. |
+| Integration and build | `src/column.html`, `src/column-ui.js`, `src/template.html`, `build.py`, `index.html` | New panel in the water column; live-column stepping pauses while the comparison runs; resumed older worlds show a model notice and the correct seed. Build inlines the engines/worker/UI and reads/writes UTF-8 explicitly. `index.html` is generated, not edited separately. |
+| Laws and observatory | `runner/laws.mjs`, `src/obs.html`, `src/obs-ui.js` | Extinct runs remain in denominators; Red Queen evidence requires an observed gape crossing before collapse; chimera claim is limited to relatedness; herd choices use independent draws. New evidence is versioned; old/mismatched evidence remains historical and is excluded from current verdicts. The UI labels historical/mixed-model data. |
+| Perpetual continuity | `runner/perpetual.mjs` | Old worlds retain their counters, eras and historical rows when resumed. `modelChanges` records a version boundary; new rows are stamped with the current version. Malformed/inconsistent checkpoints fail before overwriting existing files. |
+| Verification and documentation | `tests/*.test.cjs`, `package.json`, `README.md`, `HANDOFF.md` | Built-in Node test command, no added runtime dependencies, updated usage/model limits, and this continuation record. |
+
+Three different identifiers must not be conflated:
+
+- Column/Origins model: string `'2'`; Column snapshot schema remains numeric `v: 1`, with additive `modelVersion: '2'`.
+- Browser comparisons: `model: 'water-column/2'`, numeric `protocolVersion: 1`.
+- Laws evidence: string `modelVersion: '2'`, string `protocolVersion: '2'`.
+
+### Verification completed during implementation
+
+`npm test` passed **33 tests** across six files: engines (9), comparisons (6), worker (3), notebook UI (4), laws (7), and perpetual continuity (4). Coverage includes same-seed repeatability, legacy snapshots, treatment isolation, extinction semantics, cancellation export, corrupt/quota-limited notebook preservation, safe notes rendering, incompatible evidence exclusion and malformed checkpoint preservation. `node --check` passed for the JavaScript/modules, and `python build.py` produced the inline app without remaining build placeholders.
+
+Actual local browser checks at `http://127.0.0.1:8769/#column` included:
+
+- A completed three-seed comparison (777, 778, 779), 1000 steps per arm; saved/reopened after reload, with CSV and JSON downloads parsed. This was a short functionality check, not a scientific experiment establishing a finding.
+- Cancellation after a completed pair: partial downloads stayed available and complete-notebook saving stayed disabled.
+- Arabic RTL and English LTR, including a 390 × 844 viewport with no horizontal overflow in the inspected page; no observed console errors.
+- Historical remote laws/world data displayed with the model notices instead of current-model evidence claims.
+
+These checks precede the publication requested in the current task. A production check must separately confirm the public built asset and browser behavior; a build or deployment submission alone is insufficient.
+
+### Continuation limits and next work
+
+1. Keep historical model-1 data intact. Resume is approximate, not bit-exact, and mixed-version all-time records are not homogeneous model-2 evidence. Runner writes are atomic **per file**, not a transaction across all checkpoint files; inconsistent checkpoints are rejected rather than silently reset.
+2. The comparison uses fixed baseline settings, not the live sliders. A and B share their initial RNG state; treatment-dependent events can make their subsequent random streams diverge. Mean organism size is cell-weighted; sampled trajectories can miss brief transitions; the displayed replicate range is not a confidence interval.
+3. Notebook storage is browser-local (`genesis.experiments.v1`, at most 12 completed records). It is neither a server database nor synchronized across devices/origins; a localhost notebook does not transfer automatically to the public site. CSV/JSON downloads are the external copy. Corrupt/full storage must not be silently cleared.
+4. The capture window is an uncalibrated educational assumption. Long controlled model-2 replications and parameter sensitivity remain pending. Keep observational sequence separate from causal evidence.
+5. CI automation, lineage revival/museum, gene regulatory networks and multitrait herd selection remain future work. Do not treat them as completed or start them implicitly while maintaining this release.
+6. Before modifying the external world, inspect the actual repository/workflows and current `perpetual-data`; the original local folder contained neither `.git`, `.github/` nor `data/`. The pre-change local backup is `C:\Users\alshi\.codex\backups\nto\20261012-081423\nto`. Do not create a new perpetual world or relabel old data merely to finish a website release.
 
 ---
 
@@ -69,15 +123,16 @@ Genesis is an agent-based evolution laboratory. All engines are plain JavaScript
 | Origins | `src/origins.js` | Multilevel selection in the transition to multicellularity: public goods, soma, life cycles, chimeras | Low (toy physics), but fast and instrumented with the Price equation |
 | Herd | `src/core.js` | Quantitative genetics and animal breeding: heritability, the breeder's equation, inbreeding, AI, genomic selection | Genetics are exact for the additive model. Physiology and behaviour are stylized. |
 
-The project has two scientific layers on top of the engines:
+The project has three experimental layers on top of the engines:
 
 - **The perpetual world** (`runner/perpetual.mjs`) is one water-column world that never restarts.
   - It is resumed every few hours on GitHub Actions.
-  - Its "climate" drifts slowly.
+  - Its "climate" varies slowly around reference conditions, with reflecting bounds in model 2.
   - It writes a public record of eras, records, fossils and milestones.
 - **The laws observatory** (`runner/laws.mjs`) holds standardized experiments with fresh random seeds.
-  - Evidence accumulates across runs.
+  - Evidence accumulates across runs within a matching model/protocol version; older rows remain historical.
   - Each law gets a verdict computed from the accumulated evidence: *supported*, *deviates*, *pending*, *not general*, or *same direction, different scale*.
+- **Paired browser experiments** (`src/experiments.js`, `src/experiments-worker.js`) compare two copies of the same seeded default pond after changing one factor. They run independently of the live and perpetual worlds; the notebook is local to the browser (section 12).
 
 Honesty statement, also shown on the site: a "supported" verdict means the model is consistent with theory. It is **not** evidence about nature.
 
@@ -147,12 +202,13 @@ Design choices behind this layout:
 genesis-evolution/
 ├── index.html              BUILT single-file app (≈310 KB). Do not edit by hand; run build.py.
 ├── build.py                Inlines src/* into src/template.html → index.html, dist/index.html, dist/artifact.html
-├── package.json            scripts: build:site, perpetual, laws (no "build" script on purpose: Vercel serves static)
+├── package.json            scripts: build:site, test, perpetual, laws (no "build" script: Vercel serves static)
 ├── vercel.json             outputDirectory ".", cleanUrls, Cache-Control max-age=300
 ├── .gitignore              data/, dist/, node_modules/, *.log
 ├── README.md               Bilingual overview, findings, limits
 ├── DEPLOY.md               GitHub / Vercel / Hostinger VPS operations (Arabic + English)
 ├── HANDOFF.md              This document
+├── tests/*.test.cjs        Node built-in tests: engines, paired experiments and observatory
 ├── .github/workflows/
 │   ├── perpetual.yml       cron '17 */3 * * *', default 40 min, timeout 120, concurrency genesis-data
 │   └── laws.yml            cron '41 1 * * *', default 45 min, same concurrency group
@@ -168,6 +224,11 @@ genesis-evolution/
     ├── column.js           ENGINE: water column (≈840 lines)
     ├── column.html         Water-column UI markup
     ├── column-ui.js        Water-column UI (canvas, camera, organism card, charts); exposes window.__column
+    ├── experiments.js      Seeded paired-comparison API (CommonJS + GenesisExperiments)
+    ├── experiments-worker.js Background replicate runner (inlined as a Blob worker)
+    ├── experiments-ui.js   Bilingual results, notebook, CSV/JSON export
+    ├── experiments.html    Comparison form and results markup
+    ├── experiments.css     Responsive comparison styles
     ├── origins.js          ENGINE: Origins (≈670 lines)
     ├── origins.html        Origins UI markup
     ├── origins-ui.js       Origins UI
@@ -192,6 +253,11 @@ Build placeholders in `template.html`:
 | `/*@@COLUMN@@*/` | `column.js` |
 | `/*@@CUI@@*/` | `column-ui.js` |
 | `/*@@BUI@@*/` | `obs-ui.js` |
+| `<!--@@EXPERIMENT_HTML@@-->` | `experiments.html` |
+| `/*@@EXPERIMENT_CSS@@*/` | `experiments.css` |
+| `/*@@EXPERIMENTS@@*/` | `experiments.js` |
+| `/*@@EXPERIMENT_WORKER@@*/` | `experiments-worker.js` |
+| `/*@@EXPERIMENT_UI@@*/` | `experiments-ui.js` |
 
 Engine module pattern (identical in all three):
 
@@ -209,6 +275,7 @@ Browser globals:
 - `window.Genesis` (Herd)
 - `window.GenesisOrigins`
 - `window.GenesisColumn`
+- `window.GenesisExperiments`
 
 Runners are ES modules (`.mjs`). They load the engines with `createRequire`.
 
@@ -228,8 +295,11 @@ cd genesis-evolution
 # Open the app locally (any static server; data/ next to index.html is read first by the Observatory)
 python3 -m http.server 8000         # → http://localhost:8000/#column
 
-# Rebuild index.html after editing anything in src/
-python3 build.py
+# Rebuild index.html after editing anything in src/ (all input/output is UTF-8)
+python build.py
+
+# Built-in Node tests; no dependency installation needed
+npm test
 
 # Perpetual world, locally, for 5 minutes (resumes from ./data if present)
 MINUTES=5 DATA_DIR=data node runner/perpetual.mjs
@@ -253,16 +323,16 @@ const snapshot = sim.serialize();            // JSON-safe
 const again = Column.fromState(snapshot);    // resume
 ```
 
-### Determinism (verified 2026-10-12)
+### Determinism and verification scope
 
-- **Same seed, same options:** a bit-identical trajectory in all three engines. Checked at 1500 steps each by comparing cell counts, births and positions.
+- **Same seed, same options and same model version:** the current automated tests compare repeatability and distinct-seed divergence in all three engines over 40 steps. They also check actual symmetric mutation branches, capture bounds/handling, low-N predators, climate tendency and finite continuation of legacy schema-v1 snapshots. The original 1500-step check belonged to model 1. These are short engineering checks, not long-run scientific replication or a cross-runtime bit-identity guarantee.
 - **Randomness source:**
   - All engine randomness comes from a seeded `mulberry32`.
   - The water column keeps its RNG state in `this._rs`, so `serialize()` can store it.
   - `Math.random` is used only in `runner/laws.mjs` (to draw new seeds) and in UI code.
-- **`serialize()` → `fromState()` is statistically continuous but not bit-exact.** Positions are rounded to 1e-3 µm and biomass to 1e-6, and a little transient state (predator targets and phases, `col.down`) is not stored. Because the dynamics are chaotic, resumed trajectories diverge from uninterrupted ones while their statistics stay consistent.
+- **`serialize()` → `fromState()` is approximate, not bit-exact.** Positions are rounded to 1e-3 µm and biomass to 1e-6, and transient state (predator targets/phases, `col.down`) is not stored. Resumed trajectories can diverge. Distributional equivalence has not been established by the current checks. Paired comparisons start fresh from the same seed instead of relying on snapshots.
 
-There is **no test suite yet**. A minimal determinism test that can be added as `tests/determinism.js`:
+The automated suite lives in `tests/*.test.cjs` and runs with `npm test`. The following longer standalone example illustrates a manual seeded check; it is not the scope of the current short engine tests:
 
 ```js
 const { Column } = require('../src/column.js');
@@ -481,21 +551,20 @@ Each cell holds biomass `b`:
 
 ### 6.10 Predators (rotifer-like, gape-limited, ratio-dependent)
 
-- **Count:** `predTarget() = clamp(round(predRatio·N_cells/100), 2, 48)`.
-  - This is ratio-dependent, chemostat-style, so predators can neither boom nor bust.
-  - Note the **floor of 2** (see section 14).
+- **Count:** `predTarget() = clamp(round(predRatio·N_cells/100), 0, 48)`, or zero when predators are disabled.
+  - This is ratio-dependent, chemostat-style, with zero or one predator permitted at low N. Excess predators are removed before attacks; zero pressure cannot cause a final extra attack.
 - **Speed:** `80/(1 + gape/60)` µm/s. A bigger mouth means a slower predator.
 - **Hunting:**
   - A predator searches within 200 µm, re-targeting every 4 steps.
-  - It can only target organisms whose diameter `2a·N^0.45 ≤ gape`.
-  - Targets are scored by n/(d² + 2500).
-  - When it reaches a target it **eats the whole organism**: energy rises by 0.18 per cell and digestion lasts 40 + 3n steps.
+  - Let `r = (2a·N^0.45)/gape`. Capture efficiency is `16r²(1−r)²` for `0 < r < 1`, otherwise zero. It peaks at half the gape. This is an explicit **simplified, uncalibrated assumption**, not an empirical feeding curve.
+  - Targets are scored by `n·efficiency/(d² + 2500)`.
+  - At contact, a seeded random draw determines success with that efficiency. Success **eats the whole organism**: energy rises by 0.18 per cell and digestion lasts 40 + 3n steps. Failure costs four steps of handling time while maintenance still drains energy. An already swallowed colony cannot be counted again in that step.
   - Half of the eaten biomass is recycled to C.
 - **Energy drain:** `0.0032·(1 + gape/40)` per step.
 - **Evolution (Moran process):**
   - Every 60 steps, the best-fed predator produces a child that replaces the hungriest one.
-  - Child gape: `gape_child = gape_parent · exp(0.07·ξ + 0.25 with probability 0.04)`.
-  - **This mutation is biased upward**; see section 14.
+  - Child gape: `gape_child = gape_parent · exp(0.07·ξ + M)`, where M is zero with probability 0.96, +0.25 with probability 0.02 and −0.25 with probability 0.02.
+  - Mutational log changes are symmetric before the existing 10 µm lower bound; this does not guarantee an unchanged arithmetic mean gape or remove selection.
 - Predators are advected by the flow.
 
 ### 6.11 Options (`new Column(seed, opts)`, or `sim.setParam(key, value)` at run time)
@@ -552,7 +621,7 @@ Each cell holds biomass `b`:
 | `colonyInfo(col)` | Data for the organism card |
 | `lineage(col)` | Ancestor chain from the archive (≤ 40,000 records, pruned) |
 | `stir()` | Shakes the jar: rigid vertical displacement of every organism |
-| `climate(rate)` | Bounded random walk of light, turbidity, nutrient and predRatio, plus a rare source flip (section 9) |
+| `climate(rate)` | Mean-reverting light, turbidity, nutrient and predRatio with reflecting bounds, plus a rare source flip (section 9) |
 | `serialize()`, `Column.fromState(st)` | Persistence (section 10.1) |
 
 ---
@@ -579,7 +648,7 @@ Each cell holds biomass `b`:
 - **Physics:** soft repulsion and spring bonds (toy).
 - **Predators:**
   - Gape-limited: they swallow any unit smaller than their gape.
-  - The gape evolves.
+  - The gape evolves. In model 2 its log mutation is `0.15ξ + M`, with M = 0 (95%), +0.5 (2.5%) or −0.5 (2.5%), before the existing minimum gape of 1. The new Column capture window is not applied to this separate toy model.
   - Speed is `1.25/(1 + 0.06·√gape)`.
   - Lifespan is 2600–4000 steps, so the population turns over.
 - **Options:**
@@ -698,18 +767,20 @@ Interventions: `doDrought()`, `doBottleneck(16)`, and any parameter via `setPara
 1. **Start:**
    - Resume from `state.json.gz` and `meta.json` if both exist.
    - Otherwise create a new world with seed `Date.now() % 2147483647` and a new `meta`.
+   - Schema-v1 checkpoints remain supported. Resuming an unversioned checkpoint records `{from: 'legacy', to: '2', step, generations, at}` in `meta.modelChanges`; other older versions are recorded by their version. State, era and cumulative counters are preserved rather than silently starting a new era. New history/fossil/milestone rows are stamped `modelVersion: '2'`; old rows are not relabeled. Meta and summary expose the current version and transition history, so all-time records spanning versions remain visibly mixed evidence.
+   - Missing checkpoint pairs, malformed records and inconsistent checkpoint metadata cause an error before replacement instead of resetting the world. Individual file replacement is atomic; this is not a transaction across all files.
 2. **Loop until the time budget is spent:**
    - Run `sim.step()`.
-   - Every **4000 steps**, call `sim.climate(1)`, a bounded random walk:
+   - Every **4000 steps**, call `sim.climate(1)`, a mean-reverting stochastic update with reflected bounds:
 
-     | Variable | SD | Range |
-     |---|---|---|
-     | light | 0.05 | [0.4, 1.4] |
-     | turbidity | 6e-5 | [0.0004, 0.002] /µm |
-     | nutrient | 0.05 | [0.5, 1.6] |
-     | predRatio | 0.15 | [0.5, 5] |
+     | Variable | Reference mean | Noise coefficient | Range |
+     |---|---|---|---|
+     | light | 1 | 0.05 | [0.4, 1.4] |
+     | turbidity | 0.0012 | 6e-5 | [0.0004, 0.002] /µm |
+     | nutrient | 1 | 0.05 | [0.5, 1.6] |
+     | predRatio | 3 | 0.15 | [0, 5] |
 
-     The nutrient source also flips between mixed and sediment with probability 0.005.
+     Before reflection, `x' = mean + (x−mean)·exp(−0.08·rate) + sd·sqrt((1−exp(−0.16·rate))/0.16)·ξ`. This is a stylized climate process, not a forecast. The nutrient source flips with probability `1−exp(−0.005·rate)`. A rate of zero leaves state/RNG unchanged; negative or nonfinite rates are rejected.
    - Every **1000 steps**, append a history point and update the all-time records.
    - Every **5000 steps**, save a fossil of the largest organism (if it has ≥ 4 cells): cell coordinates relative to its centre of mass, soma flags, bonds and genes. The list is capped at 240 entries, keeping the largest per era, the top 80 by size and the most recent 120.
    - **New milestones** are appended with wall time, cumulative step and cumulative generations.
@@ -718,7 +789,9 @@ Interventions: `doDrought()`, `doBottleneck(16)`, and any parameter via `setPara
    - Thin the history if it exceeds 3000 points: the last 1500 stay dense and older points are halved.
    - Write all data files (section 10).
 
-### Current state (data commit 2026-10-12 01:16 UTC)
+### Historical model-1 state (data commit 2026-10-12 01:16 UTC)
+
+The following records precede model-2 fixes and are not current-model evidence or a fresh live deployment check.
 
 | Quantity | Value |
 |---|---|
@@ -769,9 +842,11 @@ All files live on branch `perpetual-data` (and in `./data` locally).
 
 The full resumable state of the water column: gzip-compressed JSON from `Column.serialize()`, about 200 KB.
 
+The schema remains `v: 1`; `modelVersion: '2'` is additive. `Column.fromState` accepts older v1 files without that marker. Resume is approximate (section 5), and the perpetual runner records an explicit model-change boundary (section 9).
+
 ```jsonc
 {
-  "v": 1, "seed": 765998173, "rs": <int RNG state>, "t": <step in this era>, "p": { /* options, see 6.11 */ },
+  "v": 1, "modelVersion": "2", "seed": 765998173, "rs": <int RNG state>, "t": <step in this era>, "p": { /* options, see 6.11 */ },
   "next": [nextId, nextCol, nextGeno],
   "counters": { "born", "eaten", "fractures", "fracShear", "fracPack", "gens", "nAvg", "_bornSeen" },
   "C": [ /* 64*32 nutrient values, row-major: index = k*64 + i, k = depth row from the surface */ ],
@@ -786,7 +861,8 @@ The full resumable state of the water column: gzip-compressed JSON from `Column.
 ### 10.2 `meta.json`
 
 ```jsonc
-{ "started": ISO, "era": 2, "runs": 3, "stepsTotal": 2445200, "gensPast": 2857.09, "bornPast": 1243803,
+{ "modelVersion": "2", "modelChanges": [{ "from": "legacy", "to": "2", "step", "generations", "at" }],
+  "started": ISO, "era": 2, "runs": 3, "stepsTotal": 2445200, "gensPast": 2857.09, "bornPast": 1243803,
   "wallSeconds": 3300, "lastRun": ISO,
   "eras": [{ "era": 1, "seed": 748770971, "started": ISO, "ended": ISO, "steps": 2105085, "cause": "extinction" }, ...],
   "records": { "maxSize", "maxInGroups", "maxSoma", "maxGape", "maxColonyGen", "maxBuoy" } }
@@ -797,7 +873,7 @@ The full resumable state of the water column: gzip-compressed JSON from `Column.
 The website reads this file first.
 
 ```jsonc
-{ "updated", "started", "runs", "era", "eras", "stepsTotal", "physicalSeconds", "biologicalHours", "generations", "divisions",
+{ "modelVersion": "2", "modelChanges": [...], "updated", "started", "runs", "era", "eras", "stepsTotal", "physicalSeconds", "biologicalHours", "generations", "divisions",
   "now": { "cells", "inGroups", "meanSize", "maxSize", "soma", "predators", "gape", "rms",
            "genes": { "adh", "soma", "swim", "bond", "buoy" }, "env": { "L", "K", "N", "P", "S" } },
   "records": { ... } }
@@ -805,10 +881,10 @@ The website reads this file first.
 
 ### 10.4 `history.json`
 
-An array with one point per 1000 steps. It is thinned beyond 3000 points.
+An array with one point per 1000 steps. It is thinned beyond 3000 points. New history, fossil and milestone rows include the current `modelVersion`; earlier unversioned rows remain historical.
 
 ```jsonc
-{ "w": wallISO, "era": 1, "s": cumulativeSteps, "g": cumulativeGenerations,
+{ "modelVersion": "2", "w": wallISO, "era": 1, "s": cumulativeSteps, "g": cumulativeGenerations,
   "n": cells, "inG": fractionInOrganisms, "ms": cellWeightedMeanSize, "mx": maxSize,
   "mg": [adh, soma, swim, bond, buoy], "gape": meanGape_um, "preds": count,
   "rms": rmsVerticalVelocity_um_s, "soma": somaFractionOfBonded, "depth": meanDepth_um,
@@ -818,25 +894,25 @@ An array with one point per 1000 steps. It is thinned beyond 3000 points.
 ### 10.5 `fossils.json`
 
 ```jsonc
-{ "wall", "era", "step", "gens", "id", "n", "gen", "hue", "depth",
+{ "modelVersion": "2", "wall", "era", "step", "gens", "id", "n", "gen", "hue", "depth",
   "genes": [5 means], "soma": fraction, "cells": [[dx_um, dz_um, soma0/1], ...], "bonds": [[i, j], ...] }
 ```
 
 ### 10.6 `milestones.json`
 
 ```jsonc
-[{ "key": "ms_half" | ... | "extinction", "era", "wall", "step", "gens" }]
+[{ "modelVersion": "2", "key": "ms_half" | ... | "extinction", "era", "wall", "step", "gens" }]
 ```
 
 ### 10.7 `laws-raw.json`
 
-Every replicate ever run, keyed by experiment:
+Every replicate ever run, keyed by experiment. New rows additionally carry `modelVersion: "2"` and `protocolVersion: "2"`; unversioned and mismatched rows remain historical and are excluded from current verdicts:
 
 ```jsonc
 { "herdBreeder":   [{ "seed", "mode", "target", "criterion", "n", "pred", "real", "S", "h2", "h2pts": [[h2_true, slope, n]], "at", "secs" }],
   "herdInbreeding":[{ "seed", "bank", "dF", "theory", "Ne", "Nm", "Nf", "gens", "at", "secs" }],
   "bioconvection": [{ "seed", "N", "conc", "rms", "at", "secs" }],
-  "predation":     [{ "seed", "predators", "predRatio", "peak", "transition", "collapse", "gapeRatio", "extinct",
+  "predation":     [{ "seed", "predators", "predRatio", "peak", "transition", "transitionAt", "collapse", "collapseAt", "gapeRatio", "gapeCrossedBeforeCollapse", "gapeCrossingAt", "extinct",
                       "tr": [[t, inG, adh, gape, diam]], "at", "secs" }],
   "chimeras":      [{ "seed", "aggregation", "rel", "within", "between", "secr", "meanSize", "at", "secs" }] }
 ```
@@ -844,7 +920,7 @@ Every replicate ever run, keyed by experiment:
 ### 10.8 `laws.json`
 
 ```jsonc
-{ "updated", "counts": { experiment: n },
+{ "updated", "modelVersion": "2", "protocolVersion": "2", "counts": { experiment: current_n }, "historicalCounts": { experiment: older_n },
   "laws": [{ "id", "world", "verdict", "statement": { "ar", "en" }, "pts"?, "fit"?: { "n", "k", "se", "r2" },
              "corr"?, "axes"?, ...law-specific fields }] }
 ```
@@ -857,7 +933,7 @@ Every replicate ever run, keyed by experiment:
 
 - **Choosing experiments.** It repeatedly picks the experiment furthest behind its target share. The weights are herdBreeder 3, herdInbreeding 3, bioconvection 4, predation 2 and chimeras 2.
 - **Running them.** Each experiment runs with a fresh `Math.random` seed and is appended to `laws-raw.json`. Runs continue until 92% of the time budget is used.
-- **Scoring.** Every verdict is recomputed from all accumulated evidence.
+- **Scoring.** Every verdict is recomputed only from accumulated rows matching current model/protocol `'2'`. Predation denominators include extinctions; historical rows are preserved and counted separately. The reader rejects corrupt evidence instead of silently replacing it. Files are written through temporary-file replacement.
 
 ### 11.1 Experiment protocols
 
@@ -866,12 +942,12 @@ Every replicate ever run, keyed by experiment:
 | `herdBreeder` | 2500 natural steps, then the Galton slope for every trait vs. the true h² (needs n > 80). Then 12,000 steps of selection, randomized as follows: mode selective (sireFrac 0.25) or ai (0.06), target trait random, criterion pheno or genomic. Records pred = h²S and real = R. |
 | `herdInbreeding` | mut = 0, 1500 warm-up steps, then AI with sireFrac 0.05, bankSize ∈ {2, 4, 8, 16}, heatDet 0.9, for 16,000 steps. ΔF is the slope of −ln(1−F) against mean generation, after 4000 steps. Ne is the harmonic mean, over generation-length windows, of 4·Nm·Nf/(Nm+Nf), where Nm and Nf are effective parent numbers from the contributions (Σk)²/Σk². Theory: 1/(2Ne). |
 | `bioconvection` | Biology disabled; N ∈ {100, 200, 400, 700, 1000, 1500, 2200} identical swimmers (swim 1, buoy 0.05); 900 steps; mean rms vertical velocity over steps 300–900. Concentration = N/(LX·LZ·HSL)·1e12 cells/mL. |
-| `predation` | One third of seeds have no predators; the rest have predRatio 1.5–4.5. 36,000 steps, sampled every 500. "Transition" means inGroups peaks at ≥ 0.5. "Collapse" means inGroups later falls below 0.2; gapeRatio is then the gape just before the collapse divided by the organism diameter at the peak. |
+| `predation` | One third of seeds have no predators; the rest have predRatio 1.5–4.5. Up to 36,000 steps; samples at start, every 500 steps and the endpoint (including extinction). Transition: sampled inGroups ≥ 0.5; collapse: a later sample < 0.2. A gape crossing must be observed strictly after transition and before collapse, from gape ≤ contemporary diameter to gape > contemporary diameter. gapeRatio uses both quantities from the same pre-collapse sample. The 500-step interval can miss short events; temporal order does not prove causation. |
 | `chimeras` | Origins with predators, aggregation on or off, 20,000 steps. Records the final relatedness, the mean of the last 8 Price within/between terms for secretion, and the mean size. |
 
 ### 11.2 Laws, verdict rules and evidence
 
-Evidence below is from 2026-10-11 20:37 UTC. Counts: herdBreeder 11, herdInbreeding 11, bioconvection 14, predation 7, chimeras 7.
+**Historical model-1/protocol-1 evidence and verdict rules** below are from 2026-10-11 20:37 UTC. Counts: herdBreeder 11, herdInbreeding 11, bioconvection 14, predation 7, chimeras 7. These rows do not support model-2 verdicts. The current Red Queen rule requires at least three collapses and an observed preceding crossing in at least half of them; see section 11.1. No long model-2 scientific replication was performed in this local update.
 
 | Law | Verdict rule | Evidence | Verdict | Comment |
 |---|---|---|---|---|
@@ -887,6 +963,17 @@ Evidence below is from 2026-10-11 20:37 UTC. Counts: herdBreeder 11, herdInbreed
 ---
 
 ## 12. Front end
+
+### Paired comparison and local notebook (model 2)
+
+`GenesisExperiments` exports `MODEL = 'water-column/2'`, `PROTOCOL_VERSION = 1`, `BASELINE`, `FACTORS`, `validateConfig`, `createPair`, `sample`, `summarize` and `toCSV`. This comparison protocol is separate from laws protocol `'2'`.
+
+- `createPair` constructs A and B with the same seed and full default pond options, then applies one B treatment: predators off, flow off, source sediment, or light 0.5. A retains default predators/flow on, mixed source and light 1. It does not copy live sliders. Initialization and RNG states match before the treatment; subsequent random streams can diverge with different events.
+- Config is `{factor, seed, repeats, steps}`: seed 1–2147483646, repeats 1–12, steps 100–36000. UI defaults are seed 777, 3 repeats, 5000 steps. Replicate seeds increase by one with wraparound. Repeatability is scoped to the same model, comparison protocol and settings.
+- The inlined Blob worker records start/end and every `max(20, ceil(steps/100))` steps (roughly 100 points for long runs). An extinct arm freezes at its extinction step; execution stops early if both arms are extinct. Brief transitions between samples can be missed.
+- Summaries include all completed pairs and extinctions. Extinct-arm cell count, multicellular fraction, adhesion and mean size are zero by convention; zero is absence, not reversal to unicellularity. Results show paired B−A means/ranges, per-arm extinction counts, per-replicate endpoints and the last completed pair's trajectory. Observed ranges are not confidence intervals.
+- `localStorage['genesis.experiments.v1']` holds up to 12 completed experiments with notes, versions, settings and trajectories. Storage failures preserve old data. A full notebook requires deliberate deletion; it does not evict old experiments. Export CSV contains endpoints/version/config metadata, `completedRepeats` and `complete`; JSON retains full trajectories and notes. Clearing browser data removes the notebook. Rerun uses the current model/protocol and warns on older versions.
+- Cancellation terminates the worker. Any already completed pairs can be downloaded as partial CSV/JSON (`complete: false`); the notebook accepts only fully completed experiments. Comparisons do not change the live column, its chosen preset, the perpetual world or its files.
 
 - **Single page.** `body[data-world]` selects the visible world; CSS hides the others.
   - `worlds.js` reads the URL hash (`#obs`, `#column`, `#origins`, `#herd`).
@@ -955,25 +1042,16 @@ Evidence below is from 2026-10-11 20:37 UTC. Counts: herdBreeder 11, herdInbreed
 
 ## 14. Known limitations and open problems (read this)
 
-These are ordered by how much they can mislead a conclusion.
+These are ordered by how much they can mislead a conclusion. Items 1–3 preserve the history of defects corrected in model 2; the new assumptions still need scientific validation.
 
-1. **Predator gape mutation is biased upward.**
-   - Child gape = parent × exp(0.07ξ + **0.25 with probability 0.04**). The mean log-change is +0.01 per predator birth even without selection.
-   - Selection pushes back only through slower speed and higher maintenance.
-   - The perpetual world shows gape drifting to 120–173 µm, far beyond any organism.
-   - **Origins has the same bias, and it is stronger:** `exp(0.15ξ + 0.5 with probability 0.05)`, a mean of +0.025 per birth (`src/origins.js`, `stepPredators`).
-   - **Consequence:** the "lost arms race / Red Queen collapse" pattern may be partly a mutational-bias artifact, in both worlds.
-   - **Fix:** make macro-mutations symmetric (±), then re-run the Red Queen, predation and chimeras experiments.
-2. **Gape has no lower prey-size limit.** A predator with a 150 µm mouth eats a single 10 µm cell as easily as a 40 µm organism. Real gape-limited filter feeders and raptorial predators have an optimal prey-size window and handling costs.
-   - **Fix:** a capture efficiency that falls off for prey much smaller than the gape, for example a log-normal window around gape/2 to gape.
-3. **Predator floor and climate bounds cause extinctions.**
-   - `predTarget` never goes below 2 predators, even with 5 algal cells.
-   - The climate random walk is clamped, so it **sticks at its bounds**. predRatio sat at about 4.8–5 for a long time.
-   - Era 1 died this way.
-   - **Fix:**
-     - Use a mean-reverting Ornstein–Uhlenbeck walk, or reflecting bounds.
-     - Allow 0–1 predators at very low N.
-     - Possibly add immigration of algae (a spore bank).
+1. **Upward gape macro-mutation bias — corrected in model 2.**
+   - Model 1 added +0.25 with probability 0.04 in Column (mean log increment +0.01) and +0.5 with probability 0.05 in Origins (+0.025). Historical gape of 120–173 µm and Red Queen collapse may partly reflect this artifact.
+   - Model 2 draws equally likely positive/negative macro steps in both engines. The existing minimum gape still truncates small values; symmetry in log space does not imply symmetry in arithmetic gape. Long predation/Red Queen/chimera experiments must be rerun before scientific claims are renewed.
+2. **Prey-size capture window — added to Column in model 2, still uncalibrated.**
+   - Model 1 treated any prey below gape as equally capturable. Column now uses `16r²(1−r)²` within `0 < r < 1`, weighted search and failed-attack handling time (section 6.10). Its shape and coefficients are assumptions requiring sensitivity analysis. Origins remains the separate simpler gape-limit model.
+3. **Forced predator floor and clipped climate drift — corrected in model 2.**
+   - Model 1 retained at least two predators even at five algal cells, and clamped its random climate walk. Era 1 extinction coincided with low resources and predRatio near 4.8–5; that association did not establish a single cause.
+   - Column now allows zero/one predators at low N and uses mean reversion plus reflecting bounds (section 9). This reduces those numerical artifacts but does not guarantee survival. No algal spore bank was added.
 4. **Concentration depends on a tuned slice thickness.**
    - `HSL = 25` µm and `F0 = 6` pN were tuned so that bioconvection appears.
    - The bioconvection threshold (1–2 M cells/mL) is of the order seen in laboratory suspensions, but it is **not an independent prediction**.
@@ -993,19 +1071,19 @@ These are ordered by how much they can mislead a conclusion.
    - Organisms are rigid bodies.
    - No steric interaction between organisms, which stands in for a dilute 3-D suspension.
 8. **Small replicate numbers** for every law except heritability. Treat every verdict as provisional.
-9. **The chimeras law statement overreaches.** The data support lower relatedness. They do not yet support weaker cooperation: the within-group Price terms are indistinguishable.
+9. **The old chimeras statement overreached — wording corrected.** The current card tests relatedness only. Historical Price terms did not establish weaker cooperation; that requires a separate test.
 10. **Herd genetics:**
     - additive only (no dominance or epistasis)
     - no linkage
     - genomic selection is simulated with a chosen accuracy, not estimated (no GBLUP, no markers)
 11. **Origins physics is a toy.** Units are only approximate: 1 step ≈ 30 s and a cell ≈ 5 µm.
 12. **Engineering gaps:**
-    - No automated tests or CI checks.
+    - Automated Node tests now cover engines, paired comparisons and laws summaries. A CI workflow for these new checks remains pending.
     - No `LICENSE` file. Without one, others may not legally reuse the code; the owner must choose (suggested: MIT for code, CC BY 4.0 for data).
     - No `CITATION.cff`.
     - No pinned DOI.
     - `history.json` grows to about 0.6 MB and is thinned, but `laws-raw.json` grows without bound (slowly).
-13. **Resume is not bit-exact** (section 5). It is fine for a perpetual world. Do not rely on it for exact replays; use seeds for those.
+13. **Resume is not bit-exact** (section 5). Do not rely on it for exact replays; use fresh seeds with matching model/protocol/settings. The runner records model-version boundaries, preserving history and eras. Mixed-version all-time records cannot be treated as homogeneous model-2 evidence.
 
 ---
 
@@ -1055,14 +1133,12 @@ This section exists so that solved problems are not reintroduced.
 
 ## 16. Roadmap
 
-### P0: correctness fixes (do first, then re-run the laws)
-1. **Symmetric gape macro-mutation.** In `stepPredators`, change `(this.rnd() < 0.04 ? 0.25 : 0)` to `(this.rnd() < 0.04 ? (this.rnd() < 0.5 ? 0.25 : -0.25) : 0)`. Make the matching change in `src/origins.js` `stepPredators`, which uses `(this.rnd() < 0.05 ? 0.5 : 0)`.
-2. **Prey-size window.** Make capture efficiency depend on diameter/gape, for example zero above 1 and falling for diameter/gape < 0.2. Expose it as an option.
-3. **Climate.** Replace the clamped walk with an Ornstein–Uhlenbeck process around the defaults: `x += θ(μ − x)·Δ + σ·ξ`, keeping the hard bounds only as a safety net.
-4. **Predators at low N.** Allow `predTarget` to reach 0 or 1 when N is small. Consider a small algal immigration rate in the perpetual world (documented as a spore bank).
-5. **Housekeeping.**
-   - Add `tests/determinism.js` (section 5) and a GitHub Action that runs it, together with a build check (`python3 build.py`, then `git diff --exit-code index.html`).
-   - Bump the state version `v` when serialization changes, and keep `fromState` backward compatible, or start a new era deliberately.
+### P0: implementation completed locally; scientific reruns pending
+1. **Done:** symmetric log macro-mutation in Column and Origins.
+2. **Done:** uncalibrated Column capture window and failed-attack cost, without adding unused configuration.
+3. **Done:** mean-reverting climate with reflecting bounds.
+4. **Done:** zero/one predators at low N; no forced immigration/spore bank.
+5. **Done locally:** built-in Node engine/comparison/observatory tests, `npm test`, model version exports, schema-v1 loading, additive snapshot `modelVersion`, paired controls and notebook, extinction-inclusive/versioned laws summaries. **Remaining:** CI automation, longer controls/replication and parameter sensitivity. Preserve schema compatibility in future changes; resume remains approximate.
 
 ### P1: science
 6. **More replicates for every law.** Consider lengthening the daily laws run or adding a second daily slot.
@@ -1089,7 +1165,7 @@ This section exists so that solved problems are not reintroduced.
     - `CITATION.cff`.
     - Zenodo archiving of releases and of the data branch, to get DOIs.
 18. **CLI for parameter sweeps**, for example `node runner/sweep.mjs --world column --param predRatio=1,2,3 --reps 10 --steps 50000 --out sweep.csv`.
-19. **CSV and Parquet export** of `history.json` and `laws-raw.json`.
+19. **CSV and Parquet export** of `history.json` and `laws-raw.json` (still pending). The paired-comparison notebook already exports endpoint CSV and full JSON; these are different datasets.
 20. **Model description in the ODD protocol** (Overview, Design concepts, Details; Grimm et al. 2006, 2020), the standard way to document agent-based models for publication.
 21. **Observatory improvements:** a downloadable data bundle, per-law raw scatter plots with confidence intervals, and an era comparison view.
 
@@ -1158,14 +1234,9 @@ This section exists so that solved problems are not reintroduced.
 
 Paste this together with this file:
 
-> You are continuing the Genesis project (https://github.com/YasirObaid5/genesis-evolution, live at https://genesis-evolution.vercel.app). Read HANDOFF.md fully before changing anything. Start with the P0 items in section 16:
-> - symmetric gape macro-mutation
-> - prey-size window
-> - Ornstein–Uhlenbeck climate
-> - predator floor
-> - a determinism test with CI
+> You are continuing the Genesis project. Read HANDOFF.md before changing anything. The bounded model-2 P0 corrections, paired experiments/notebook and versioned law summaries are implemented locally. Verify current files and deployment independently; do not repeat completed fixes or treat model-1 evidence as current. Next scientific work is longer controlled replication and sensitivity analysis; CI remains pending. GRNs, lineage revival and multitrait breeding remain unimplemented extensions.
 >
-> Keep engines deterministic and DOM-free. Keep `serialize`/`fromState` backward compatible. Rebuild `index.html` with `python3 build.py`. Never commit `data/` to `main`. After each change, run the relevant laws experiments locally, report the results with replicate counts, and update README, HANDOFF and the law statements honestly. Reply to the owner in Arabic, and do not put punctuation adjacent to URLs.
+> Keep engines deterministic and DOM-free. Keep `serialize`/`fromState` backward compatible and document approximate continuation. Run `npm test` and rebuild `index.html` with `python build.py` (UTF-8). Never commit `data/` to `main`. For new scientific findings, run the relevant controls/replicates, report sample counts and model/protocol versions, and update the law statements honestly. Reply to the owner in Arabic.
 
 ---
 

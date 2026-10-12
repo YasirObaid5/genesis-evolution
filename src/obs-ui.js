@@ -38,6 +38,10 @@ const L = {
     v_supported: 'مدعوم', v_deviates: 'ينحرف', v_pending: 'يجمع الأدلة', 'v_not general': 'ليس عامًا', 'v_same direction, different scale': 'الاتجاه صحيح والمقدار مختلف',
     n_exp: 'تجربة', fitk: 'الميل', r2: 'R²', threshold: 'العتبة', withP: 'مع مفترسات', withoutP: 'بلا مفترسات', transitions: 'انتقالات', collapses: 'انهيارات',
     clonal: 'نسيلية', chimeric: 'خيمرية', rel: 'الارتباط r',
+    extinct_runs: 'انتهت بالانقراض', all_runs: 'نسبة الوصول خلال التجربة؛ المقام يشمل كل التجارب، حتى المنقرضة.',
+    preceded: 'انهيارات سبقها تجاوز للحجم', crossing_note: 'تجاوز مرصود بعد الانتقال وقبل الانهيار، بقياس كل 500 خطوة. النسبة gape / ⌀ تقارن الفم بقطر الكائنات في العينة السابقة للانهيار؛ لا تحدد سبب الانهيار.',
+    historical: 'بيانات تاريخية', historical_note: 'هذه النتائج تخص نموذجًا أو بروتوكولًا سابقًا. حُجبت أحكام الدعم حتى تتوفر تجارب بالإصدار الحالي؛ السجل الأصلي محفوظ.',
+    archived: 'تجربة تاريخية محفوظة ومستبعدة من هذه الحسابات', current_evidence: 'تجارب الإصدار الحالي', evidence_version: 'إصدار النموذج / البروتوكول',
     w_herd: 'القطيع', w_column: 'عمود الماء', w_origins: 'الأصول',
     nodata: 'لا توجد بيانات بعد. ستظهر هنا بعد أول تشغيل مجدول على GitHub.', loaded: 'المصدر',
     ladder_ceiling: 'سقف هذا النموذج', ceiling_note: 'يحتاج قوانين أو جينات غير موجودة في هذا العالم',
@@ -66,6 +70,10 @@ const L = {
     v_supported: 'Supported', v_deviates: 'Deviates', v_pending: 'Gathering evidence', 'v_not general': 'Not general', 'v_same direction, different scale': 'Right direction, different scale',
     n_exp: 'experiments', fitk: 'slope', r2: 'R²', threshold: 'threshold', withP: 'with predators', withoutP: 'without predators', transitions: 'transitions', collapses: 'collapses',
     clonal: 'clonal', chimeric: 'chimeric', rel: 'relatedness r',
+    extinct_runs: 'ended in extinction', all_runs: 'Share reaching the transition during a run; the denominator includes every run, including extinctions.',
+    preceded: 'collapses preceded by a crossing', crossing_note: 'A crossing observed after transition and before collapse, sampled every 500 steps. gape / ⌀ compares gape with organism diameter in the sample before collapse; it does not identify the cause.',
+    historical: 'Historical evidence', historical_note: 'These results belong to an earlier model or protocol. Support verdicts are hidden until current-version experiments are available; original evidence is preserved.',
+    archived: 'historical runs retained and excluded from these calculations', current_evidence: 'current-version runs', evidence_version: 'model / protocol version',
     w_herd: 'Herd', w_column: 'Water column', w_origins: 'Origins',
     nodata: 'No data yet. It will appear after the first scheduled run on GitHub.', loaded: 'source',
     ladder_ceiling: 'This model’s ceiling', ceiling_note: 'needs laws or genes that do not exist in this world',
@@ -254,6 +262,9 @@ function renderStatus() {
   $('#bUpd').textContent = S ? ago(S.updated) : '—';
   $('#bSource').textContent = D.source ? `${t('loaded')}: ${D.source}` : t('nodata');
   $('#bWatch').disabled = !D.source;
+  const old = S && String(S.modelVersion || 'legacy') !== String(window.GenesisColumn.MODEL_VERSION);
+  const mixed = S && S.modelChanges && S.modelChanges.length;
+  $('#bModelNotice').textContent = old ? (lang() === 'ar' ? 'بيانات العالم المعروض من نموذج سابق. زر المشاهدة يستأنف نسخة محلية بقواعد النموذج الحالي؛ لا يغيّر العالم المنشور.' : 'Displayed world data uses an earlier model. Watch continues a local copy under current rules; it does not change the published world.') : mixed ? (lang() === 'ar' ? 'يمتد سجل هذا العالم عبر إصدارات مختلفة؛ الأرقام القياسية التاريخية ليست نتائج لنموذج واحد ثابت.' : 'This world spans model versions; its historical records do not describe one unchanged model.') : '';
 }
 function renderMs() {
   const box = $('#bMs');
@@ -296,9 +307,18 @@ function lawScatter(cv, law) {
 }
 function renderLaws() {
   const box = $('#bLaws');
+  const notice = $('#bLawsNotice');
+  notice.textContent = '';
   if (!D.laws) { box.innerHTML = `<p class="insp-empty">${t('nodata')}</p>`; $('#bLawsMeta').textContent = ''; return; }
   const total = Object.values(D.laws.counts || {}).reduce((a, b) => a + b, 0);
-  $('#bLawsMeta').textContent = `${total} ${t('n_exp')} · ${ago(D.laws.updated)}`;
+  const current = D.laws.modelVersion === String(window.GenesisColumn.MODEL_VERSION) && D.laws.protocolVersion === '2';
+  if (!current) {
+    $('#bLawsMeta').textContent = `${t('historical')} · ${total} ${t('n_exp')} · ${ago(D.laws.updated)}`;
+    notice.textContent = t('historical_note'); box.replaceChildren(); return;
+  }
+  const historical = Object.values(D.laws.historicalCounts || {}).reduce((a, b) => a + b, 0);
+  $('#bLawsMeta').textContent = `${total} ${t('current_evidence')} · ${t('evidence_version')} ${D.laws.modelVersion} / ${D.laws.protocolVersion} · ${ago(D.laws.updated)}`;
+  if (historical) notice.textContent = `${historical} ${t('archived')}.`;
   const cls = (v) => v === 'supported' ? 'good' : v === 'pending' ? 'wait' : 'bad';
   box.innerHTML = D.laws.laws.map((law, i) => {
     let body = '';
@@ -306,9 +326,9 @@ function renderLaws() {
       const f = law.fit;
       body = `<canvas class="lawc" data-l="${i}"></canvas><p class="note">${(LAW_EXTRA[law.id] || {})[lang()] || ''}${f ? ` · ${t('fitk')} <bdi dir="ltr" class="mono">${f.k} ± ${f.se}</bdi> · ${t('r2')} <bdi dir="ltr" class="mono">${f.r2}</bdi> · n <bdi class="mono">${f.n}</bdi>` : ''}${law.threshold ? ` · ${t('threshold')} ≈ <bdi dir="ltr" class="mono">${(law.threshold / 1e6).toFixed(1)}M/mL</bdi>` : ''}</p>`;
     } else if (law.id === 'predation') {
-      body = `<div class="eq"><div><span>${t('withP')}</span><b>${law.withPred.frac === null ? '—' : Math.round(law.withPred.frac * 100) + '%'}</b><span class="mono">n ${law.withPred.n}</span></div><div><span>${t('withoutP')}</span><b>${law.without.frac === null ? '—' : Math.round(law.without.frac * 100) + '%'}</b><span class="mono">n ${law.without.n}</span></div></div>`;
+      body = `<div class="eq"><div><span>${t('withP')}</span><b>${law.withPred.frac === null ? '—' : Math.round(law.withPred.frac * 100) + '%'}</b><span class="mono">${law.withPred.transitions} / ${law.withPred.n}</span><span>${t('extinct_runs')}: ${law.withPred.extinct}</span></div><div><span>${t('withoutP')}</span><b>${law.without.frac === null ? '—' : Math.round(law.without.frac * 100) + '%'}</b><span class="mono">${law.without.transitions} / ${law.without.n}</span><span>${t('extinct_runs')}: ${law.without.extinct}</span></div></div><p class="note">${t('all_runs')}</p>`;
     } else if (law.id === 'redqueen') {
-      body = `<div class="eq"><div><span>${t('transitions')}</span><b>${law.transitions}</b></div><div><span>${t('collapses')}</span><b>${law.collapses}</b></div><div><span>gape / ⌀</span><b>${law.gapeRatio ?? '—'}</b></div></div>`;
+      body = `<div class="eq"><div><span>${t('transitions')}</span><b>${law.transitions}</b><span>${t('extinct_runs')}: ${law.extinct}</span></div><div><span>${t('collapses')}</span><b>${law.collapses}</b></div><div><span>${t('preceded')}</span><b>${law.preceded}</b></div></div><p class="note">${t('crossing_note')} <bdi class="mono">gape / ⌀ = ${law.gapeRatio ?? '—'}</bdi></p>`;
     } else if (law.id === 'chimeras') {
       body = `<div class="eq"><div><span>${t('clonal')} · ${t('rel')}</span><b>${law.clonal.rel ?? '—'}</b><span class="mono">n ${law.clonal.n}</span></div><div><span>${t('chimeric')} · ${t('rel')}</span><b>${law.chimeric.rel ?? '—'}</b><span class="mono">n ${law.chimeric.n}</span></div></div>`;
     }

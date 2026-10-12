@@ -21,6 +21,7 @@
 (function (root) {
 'use strict';
 
+const MODEL_VERSION = '2';
 
 /* ---------- physical constants ---------- */
 const ETA = 1e-3;                 // water viscosity, pN·s/µm² (= 1 mPa·s)
@@ -99,7 +100,7 @@ class Column {
     this.head = new Int32Array(HX * HZ); this.next = new Int32Array(8192);
   }
 
-  /* mulberry32 with its state held on the instance, so a run can be saved and resumed exactly */
+  /* mulberry32 state is persisted; rounded snapshots still resume approximately */
   seedRng(seed) {
     this._rs = seed | 0;
     this.rnd = () => {
@@ -216,8 +217,13 @@ class Column {
   makePred(x, z, gape, e) {
     return { id: this.nextId++, x, z, e, gape: Math.max(10, gape), age: 0, maxAge: 2600 + this.rnd() * 1400, digest: 0, phase: this.rnd() * 6.28, target: null, flash: 0, h: this.rnd() * 6.28 };
   }
-  predTarget() { return Math.max(2, Math.min(48, Math.round(this.p.predRatio * this.cells.length / 100))); }
+  predTarget() { return this.p.predators ? Math.max(0, Math.min(48, Math.round(this.p.predRatio * this.cells.length / 100))) : 0; }
   colonyDiameter(n) { return 2 * A * Math.pow(n, DF); }
+  captureEfficiency(diameter, gape) {
+    const r = diameter / gape;
+    // Simplified, uncalibrated prey-size window: peak capture at half the gape, zero at either edge.
+    return r > 0 && r < 1 ? 16 * r * r * (1 - r) * (1 - r) : 0;
+  }
 
   /* ---------- grid helpers ---------- */
   sample(F, x, z) {
@@ -552,6 +558,8 @@ class Column {
   }
 
   stepPredators(deaths) {
+    const P = this.preds, target = this.predTarget();
+    if (P.length > target) { P.sort((a, b) => b.e - a.e); P.length = target; }
     for (const pr of this.preds) {
       pr.age++; pr.phase += 0.15; if (pr.flash > 0) pr.flash--;
       const speed = 80 / (1 + pr.gape / 60);
@@ -562,23 +570,28 @@ class Column {
           let best = null, bs = 0;
           for (const col of this.colonies.values()) {
             const n = col.cells.length;
-            if (this.colonyDiameter(n) > pr.gape) continue;
+            const efficiency = this.captureEfficiency(this.colonyDiameter(n), pr.gape);
+            if (!efficiency || col.eaten) continue;
             const dx = dxMin(col.cx - pr.x), dz = col.cz - pr.z, d2 = dx * dx + dz * dz;
             if (d2 > 200 * 200) continue;
-            const s = n / (d2 + 2500); if (s > bs) { bs = s; best = col; }
+            const s = n * efficiency / (d2 + 2500); if (s > bs) { bs = s; best = col; }
           }
           pr.target = best;
         }
         const tg = pr.target;
-        if (tg && tg.alive && this.colonyDiameter(tg.cells.length) <= pr.gape) {
+        if (tg && tg.alive && !tg.eaten && this.colonyDiameter(tg.cells.length) < pr.gape) {
           const dx = dxMin(tg.cx - pr.x), dz = tg.cz - pr.z, d = Math.hypot(dx, dz) || 1;
           pr.h = Math.atan2(dz, dx);
           sx = dx / d * speed; sz = dz / d * speed;
           if (d < 20 + this.colonyDiameter(tg.cells.length) / 2 + speed * DT * 0.5) {
             const n = tg.cells.length;
-            tg.eaten = true;
-            for (const c of tg.cells) if (c.alive) { c.alive = false; deaths.push(c); this.C[this.nodeOf(c.x, c.z)] += 0.5 * c.b / (VNODE * 2.5e-6); }
-            pr.e += n * 0.18; pr.digest = 40 + n * 3; pr.flash = 14; this.eaten += n; pr.target = null;
+            pr.digest = 4; // Failed attacks still consume handling time and maintenance energy.
+            if (this.rnd() < this.captureEfficiency(this.colonyDiameter(n), pr.gape)) {
+              tg.eaten = true;
+              for (const c of tg.cells) if (c.alive) { c.alive = false; deaths.push(c); this.C[this.nodeOf(c.x, c.z)] += 0.5 * c.b / (VNODE * 2.5e-6); }
+              pr.e += n * 0.18; pr.digest = 40 + n * 3; pr.flash = 14; this.eaten += n;
+            }
+            pr.target = null;
           }
         } else {
           pr.h += this.g() * 0.25; sx = Math.cos(pr.h) * speed * 0.6; sz = Math.sin(pr.h) * speed * 0.6;
@@ -590,15 +603,12 @@ class Column {
       pr.e = Math.max(0, pr.e - 0.0032 * (1 + pr.gape / 40));
     }
     // predator turnover (Moran process): the best-fed predator replaces the hungriest one
-    const P = this.preds;
-    const target = this.predTarget();
     while (P.length < target) P.push(this.makePred(this.rnd() * LX, 200 + this.rnd() * (LZ - 400), P.length ? P[0].gape : 13, 1));
-    if (P.length > target) { P.sort((a, b) => b.e - a.e); P.length = target; }
     if (this.t % 60 === 0 && P.length > 1) {
       let hi = P[0], lo = P[0];
       for (const pr of P) { if (pr.e > hi.e) hi = pr; if (pr.e < lo.e) lo = pr; }
       if (hi !== lo && hi.e > lo.e + 0.3) {
-        const child = this.makePred(hi.x, hi.z, hi.gape * Math.exp(this.g() * 0.07 + (this.rnd() < 0.04 ? 0.25 : 0)), hi.e / 2);
+        const child = this.makePred(hi.x, hi.z, hi.gape * Math.exp(this.g() * 0.07 + (this.rnd() < 0.04 ? (this.rnd() < 0.5 ? 0.25 : -0.25) : 0)), hi.e / 2);
         hi.e /= 2;
         P[P.indexOf(lo)] = child;
       }
@@ -772,7 +782,7 @@ class Column {
     const preds = this.preds.map(p => [p.id, r3(p.x), r3(p.z), r6(p.e), r6(p.gape), p.age, p.maxAge, p.digest, r3(p.h)]);
     const arch = Array.from(this.archive.values()).slice(-6000).map(r => [r.id, r.parent, r.gen, r.born, r.died, r.peak, r3(r.hue), r.repro]);
     return {
-      v: 1, seed: this.seed, rs: this._rs, t: this.t, p: this.p,
+      v: 1, modelVersion: MODEL_VERSION, seed: this.seed, rs: this._rs, t: this.t, p: this.p,
       next: [this.nextId, this.nextCol, this.nextGeno],
       counters: { born: this.born, eaten: this.eaten, fractures: this.fractures, fracShear: this.fracShear, fracPack: this.fracPack, gens: this.gens, nAvg: this.nAvg, _bornSeen: this.born },
       C: Array.from(this.C, r6), cells, cols, preds, arch,
@@ -810,14 +820,21 @@ class Column {
     return sim;
   }
 
-  /* slow environmental change for long runs: a bounded random walk of the "climate" */
+  /* Mean-reverting climate around reference conditions; reflecting bounds avoid clipping. */
   climate(rate = 1) {
-    const walk = (k, sd, lo, hi) => { this.p[k] = Math.min(hi, Math.max(lo, this.p[k] + this.g() * sd * rate)); };
-    walk('light', 0.05, 0.4, 1.4);
-    walk('turbidity', 0.00006, 0.0004, 0.002);
-    walk('nutrient', 0.05, 0.5, 1.6);
-    walk('predRatio', 0.15, 0.5, 5);
-    if (this.rnd() < 0.005 * rate) this.p.source = this.p.source === 'mixed' ? 'sediment' : 'mixed';
+    if (!Number.isFinite(rate) || rate < 0) throw new RangeError('Climate rate must be finite and non-negative');
+    if (!rate) return;
+    const retention = Math.exp(-0.08 * rate), noise = Math.sqrt((1 - retention * retention) / 0.16);
+    const walk = (k, mean, sd, lo, hi) => {
+      const x = mean + (this.p[k] - mean) * retention + this.g() * sd * noise, width = hi - lo;
+      const reflected = ((x - lo) % (2 * width) + 2 * width) % (2 * width);
+      this.p[k] = lo + (reflected <= width ? reflected : 2 * width - reflected);
+    };
+    walk('light', 1, 0.05, 0.4, 1.4);
+    walk('turbidity', 0.0012, 0.00006, 0.0004, 0.002);
+    walk('nutrient', 1, 0.05, 0.5, 1.6);
+    walk('predRatio', 3, 0.15, 0, 5);
+    if (this.rnd() < 1 - Math.exp(-0.005 * rate)) this.p.source = this.p.source === 'mixed' ? 'sediment' : 'mixed';
   }
 
   stir() {
@@ -832,7 +849,7 @@ class Column {
   }
 }
 
-const API = { Column, GENES, NG, ADH, SOMA, SWIM, BOND, BUOY, LX, LZ, NX, NZ, DX, A, ETA, WPP, ZETA1, DF, F0, D_N, DT, B_GYRO, HSL };
+const API = { MODEL_VERSION, Column, GENES, NG, ADH, SOMA, SWIM, BOND, BUOY, LX, LZ, NX, NZ, DX, A, ETA, WPP, ZETA1, DF, F0, D_N, DT, B_GYRO, HSL };
 if (typeof module !== 'undefined' && module.exports) module.exports = API;
 root.GenesisColumn = API;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

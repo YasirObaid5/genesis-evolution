@@ -8,26 +8,57 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
+import { pathToFileURL } from 'node:url';
 const require = createRequire(import.meta.url);
 const Herd = require('../src/core.js');
 const { Origins } = require('../src/origins.js');
 const Col = require('../src/column.js');
 
-const DATA = process.env.DATA_DIR || 'data';
-const MINUTES = +(process.env.MINUTES || 25);
-fs.mkdirSync(DATA, { recursive: true });
-const rawPath = path.join(DATA, 'laws-raw.json');
-const raw = (() => { try { return JSON.parse(fs.readFileSync(rawPath, 'utf8')); } catch { return {}; } })();
+export const MODEL_VERSION = String(Col.MODEL_VERSION);
+export const PROTOCOL_VERSION = '2';
 const now = () => new Date().toISOString();
 const newSeed = () => (Math.floor(Math.random() * 2147483646) + 1);
+const pick = (a, rnd = Math.random) => a[Math.floor(rnd() * a.length)];
+export const isCurrentEvidence = r => r.modelVersion === MODEL_VERSION && r.protocolVersion === PROTOCOL_VERSION;
+
+export function readRaw(file) {
+  let text;
+  try { text = fs.readFileSync(file, 'utf8'); } catch (e) { if (e.code === 'ENOENT') return {}; throw e; }
+  const raw = JSON.parse(text);
+  if (!raw || Array.isArray(raw) || typeof raw !== 'object' || Object.values(raw).some(rows => !Array.isArray(rows) || rows.some(r => !r || typeof r !== 'object' || Array.isArray(r)))) {
+    throw new Error('Invalid laws evidence file; existing data has not been changed.');
+  }
+  return raw;
+}
+
+function writeJSON(file, value) {
+  const text = JSON.stringify(value), temp = `${file}.${process.pid}.tmp`;
+  fs.writeFileSync(temp, text, { flag: 'wx' });
+  try { fs.renameSync(temp, file); } finally { if (fs.existsSync(temp)) fs.unlinkSync(temp); }
+}
+
+export function herdDesign(rnd = Math.random) {
+  return { mode: pick(['selective', 'ai'], rnd), target: Math.floor(rnd() * Herd.NT), criterion: pick(['pheno', 'genomic'], rnd) };
+}
+
+// shortcut: crossings are observed every 500 steps, sample more often for event timing studies.
+export function summarizePredation(tr) {
+  const peak = tr.reduce((m, r) => Math.max(m, r[1]), 0);
+  const first = tr.findIndex(r => r[1] >= 0.5);
+  const collapseAt = first < 0 ? -1 : tr.findIndex((r, i) => i > first && r[1] < 0.2);
+  const crossing = collapseAt < 0 ? -1 : tr.findIndex((r, i) => i > first && i < collapseAt && tr[i - 1][3] <= tr[i - 1][4] && r[3] > r[4]);
+  return { peak, transition: first >= 0, transitionAt: first < 0 ? null : tr[first][0], collapse: collapseAt >= 0,
+    collapseAt: collapseAt < 0 ? null : tr[collapseAt][0], gapeCrossedBeforeCollapse: crossing >= 0,
+    gapeCrossingAt: crossing < 0 ? null : tr[crossing][0],
+    gapeRatio: collapseAt < 0 ? null : +(tr[collapseAt - 1][3] / Math.max(1, tr[collapseAt - 1][4])).toFixed(2) };
+}
 
 /* ---------------- experiments ---------------- */
 const EXP = {
   // L1 + L2: selection response vs breeder's equation; regression estimate of h² vs the genome's truth
   herdBreeder() {
     const seed = newSeed();
-    const modes = ['selective', 'ai'], crits = ['pheno', 'genomic'];
-    const mode = modes[seed % 2], target = seed % 6, criterion = crits[(seed >> 3) % 2];
+    const { mode, target, criterion } = herdDesign();
     const s = new Herd.Sim(seed);
     for (let i = 0; i < 2500; i++) s.step();
     // natural mode first: parent–offspring regression for every trait
@@ -43,7 +74,7 @@ const EXP = {
   // L3: rate of inbreeding vs effective population size
   herdInbreeding() {
     const seed = newSeed(), banks = [2, 4, 8, 16];
-    const bank = banks[seed % 4];
+    const bank = pick(banks);
     const s = new Herd.Sim(seed, { mut: 0 });
     for (let i = 0; i < 1500; i++) s.step();
     s.setParam('sireFrac', 0.05); s.setParam('bankSize', bank); s.setParam('heatDet', 0.9); s.setParam('mode', 'ai');
@@ -74,7 +105,7 @@ const EXP = {
   // L4: bioconvection appears above a critical concentration of swimmers
   bioconvection() {
     const seed = newSeed(), Ns = [100, 200, 400, 700, 1000, 1500, 2200];
-    const N = Ns[seed % Ns.length];
+    const N = pick(Ns);
     const s = new Col.Column(seed, { predators: false, acc: 0 });
     s.biology = () => {};
     s.cells.length = 0; s.colonies.clear();
@@ -89,24 +120,21 @@ const EXP = {
   },
   // L5 + L6: size-selective predation and multicellularity; the Red Queen collapse
   predation() {
-    const seed = newSeed(), withPred = seed % 3 !== 0;
-    const s = new Col.Column(seed, { predators: withPred, predRatio: withPred ? 1.5 + (seed % 7) * 0.5 : 0 });
+    const seed = newSeed(), withPred = Math.random() >= 1 / 3;
+    const s = new Col.Column(seed, { predators: withPred, predRatio: withPred ? pick([1.5, 2, 2.5, 3, 3.5, 4, 4.5]) : 0 });
     const tr = [];
+    const sample = () => { const st = s.computeStats(); tr.push([s.t, +st.inGroups.toFixed(3), +st.mg[Col.ADH].toFixed(3), +st.gape.toFixed(1), +s.colonyDiameter(Math.max(1, st.meanSize)).toFixed(1)]); };
+    sample();
     for (let i = 0; i < 36000 && s.cells.length; i++) {
       s.step();
-      if (s.t % 500 === 0) { const st = s.stats; tr.push([s.t, +st.inGroups.toFixed(3), +st.mg[Col.ADH].toFixed(3), +st.gape.toFixed(1), +s.colonyDiameter(Math.max(1, st.meanSize)).toFixed(1)]); }
+      if (s.t % 500 === 0) sample();
     }
-    let peak = 0, peakAt = -1; tr.forEach((r, i) => { if (r[1] > peak) { peak = r[1]; peakAt = i; } });
-    const transition = peak >= 0.5;
-    let collapse = false, gapeRatio = null;
-    if (transition) {
-      for (let i = peakAt + 1; i < tr.length; i++) if (tr[i][1] < 0.2) { collapse = true; gapeRatio = +(tr[i - 1][3] / Math.max(1, tr[peakAt][4])).toFixed(2); break; }
-    }
-    return { seed, predators: withPred, predRatio: s.p.predRatio, peak, transition, collapse, gapeRatio, extinct: !s.cells.length, tr: tr.filter((_, i) => i % 4 === 0) };
+    if (tr.at(-1)[0] !== s.t) sample();
+    return { seed, predators: withPred, predRatio: s.p.predRatio, ...summarizePredation(tr), extinct: !s.cells.length, tr };
   },
-  // L7: chimeras (aggregation) lower relatedness and strengthen selection against cooperation within organisms
+  // L7 tests relatedness; the recorded Price terms are descriptive only.
   chimeras() {
-    const seed = newSeed(), aggr = seed % 2 === 1;
+    const seed = newSeed(), aggr = Math.random() >= 0.5;
     const s = new Origins(seed, { predators: true, aggregation: aggr });
     for (let i = 0; i < 20000 && s.cells.length; i++) s.step();
     const late = s.price.slice(-8);
@@ -115,20 +143,6 @@ const EXP = {
   },
 };
 const WEIGHT = { herdBreeder: 3, herdInbreeding: 3, bioconvection: 4, predation: 2, chimeras: 2 };
-
-/* ---------------- run within the time budget ---------------- */
-const t0 = Date.now(), budget = MINUTES * 60 * 1000;
-let done = 0;
-while (Date.now() - t0 < budget * 0.92) {
-  // pick the experiment that is furthest behind its target share
-  let pick = null, best = Infinity;
-  for (const k in EXP) { const n = (raw[k] || []).length / WEIGHT[k]; if (n < best) { best = n; pick = k; } }
-  const ts = Date.now();
-  let res = null;
-  try { res = EXP[pick](); } catch (e) { console.error(pick, e.message); }
-  if (res) { res.at = now(); res.secs = Math.round((Date.now() - ts) / 1000); (raw[pick] = raw[pick] || []).push(res); done++; }
-  console.log(`${pick} done in ${((Date.now() - ts) / 1000).toFixed(0)} s`);
-}
 
 /* ---------------- statistics ---------------- */
 function ols(pts) {
@@ -146,12 +160,15 @@ function ols(pts) {
 function thru0(pts) {
   const n = pts.length; if (n < 3) return null;
   let sxy = 0, sxx = 0; for (const [x, y] of pts) { sxy += x * y; sxx += x * x; }
+  if (sxx <= 0) return null;
   const k = sxy / sxx; let sse = 0, syy = 0, my = pts.reduce((a, p) => a + p[1], 0) / n;
   for (const [x, y] of pts) { sse += (y - k * x) ** 2; syy += (y - my) ** 2; }
   const se = Math.sqrt(sse / (n - 1) / sxx);
   return { n, k: +k.toFixed(3), se: +se.toFixed(3), r2: +(1 - sse / Math.max(1e-12, syy)).toFixed(3) };
 }
 const verdictK = (fit, tol = 0.25) => !fit ? 'pending' : Math.abs(fit.k - 1) <= Math.max(tol, 2 * fit.se) ? 'supported' : 'deviates';
+export function summarizeEvidence(allRaw, updated = now()) {
+const raw = Object.fromEntries(Object.entries(allRaw).map(([k, rows]) => [k, rows.filter(isCurrentEvidence)]));
 const laws = [];
 
 { // L1 breeder's equation (phenotypic selection, where it applies)
@@ -193,18 +210,23 @@ const laws = [];
 }
 { // L5 + L6 predation
   const runs = raw.predation || [];
-  const wp = runs.filter(r => r.predators && !r.extinct), np = runs.filter(r => !r.predators && !r.extinct);
+  const wp = runs.filter(r => r.predators), np = runs.filter(r => !r.predators);
   const frac = (a) => a.length ? +(a.filter(r => r.transition).length / a.length).toFixed(2) : null;
-  laws.push({ id: 'predation', world: 'column', withPred: { n: wp.length, frac: frac(wp) }, without: { n: np.length, frac: frac(np) },
+  const group = a => ({ n: a.length, transitions: a.filter(r => r.transition).length, extinct: a.filter(r => r.extinct).length, frac: frac(a) });
+  laws.push({ id: 'predation', world: 'column', withPred: group(wp), without: group(np),
     verdict: wp.length < 3 || np.length < 2 ? 'pending' : frac(wp) > frac(np) + 0.3 ? 'supported' : 'deviates',
-    statement: { ar: 'الافتراس المحدود بحجم الفم يدفع نحو تعدد الخلايا', en: 'Gape-limited predation drives the evolution of multicellularity' } });
+    statement: { ar: 'اختبار: هل تزداد نسبة التجارب التي تصل إلى تعدد الخلايا مع الافتراس؟ تُحتسب جميع التجارب، بما فيها المنقرضة.', en: 'Test: does predation increase the share of runs reaching multicellularity? All runs are counted, including extinctions.' } });
   const tr = wp.filter(r => r.transition);
   const coll = tr.filter(r => r.collapse);
+  const preceded = coll.filter(r => r.gapeCrossedBeforeCollapse);
+  const ratios = coll.map(r => r.gapeRatio).filter(Number.isFinite);
   laws.push({ id: 'redqueen', world: 'column', transitions: tr.length, collapses: coll.length, frac: tr.length ? +(coll.length / tr.length).toFixed(2) : null,
-    gapeRatio: coll.length ? +(coll.reduce((a, r) => a + (r.gapeRatio || 0), 0) / coll.length).toFixed(2) : null,
+    preceded: preceded.length, extinct: tr.filter(r => r.extinct).length,
+    crossedFrac: coll.length ? +(preceded.length / coll.length).toFixed(2) : null,
+    gapeRatio: ratios.length ? +(ratios.reduce((a, v) => a + v, 0) / ratios.length).toFixed(2) : null,
     examples: tr.slice(-4).map(r => r.tr),
-    verdict: tr.length < 3 ? 'pending' : coll.length / tr.length >= 0.5 ? 'supported' : 'not general',
-    statement: { ar: 'حين يتجاوز فم المفترس قطر الكائنات ينهار تعدد الخلايا (سباق تسلح خاسر)', en: 'When predator gape overtakes organism size, multicellularity collapses (a lost arms race)' } });
+    verdict: coll.length < 3 ? 'pending' : preceded.length / coll.length >= 0.5 ? 'supported' : 'not general',
+    statement: { ar: 'اختبار زمني: هل يسبق نصف الانهيارات على الأقل تجاوز مرصود لفم المفترس قطر الكائنات بعد الانتقال؟ التعاقب لا يثبت السببية.', en: 'Temporal test: are at least half of collapses preceded by an observed gape crossing above organism diameter after transition? Sequence does not establish causation.' } });
 }
 { // L7 chimeras
   const runs = raw.chimeras || [];
@@ -212,11 +234,40 @@ const laws = [];
   const m = (arr, k) => arr.length ? +(arr.reduce((x, r) => x + (r[k] || 0), 0) / arr.length).toFixed(4) : null;
   laws.push({ id: 'chimeras', world: 'origins', clonal: { n: c.length, rel: m(c, 'rel'), within: m(c, 'within'), size: m(c, 'meanSize') }, chimeric: { n: a.length, rel: m(a, 'rel'), within: m(a, 'within'), size: m(a, 'meanSize') },
     verdict: a.length < 2 || c.length < 2 ? 'pending' : m(a, 'rel') < m(c, 'rel') ? 'supported' : 'deviates',
-    statement: { ar: 'الكائنات الخيمرية أقل ارتباطًا وراثيًا من الكائنات النسيلية، فيضعف فيها التعاون', en: 'Chimeric organisms are less related than clonal ones, which weakens cooperation inside them' } });
+    statement: { ar: 'اختبار: هل تكون الكائنات الخيمرية أقل ارتباطًا وراثيًا من الكائنات النسيلية؟ هذا القياس لا يثبت ضعف التعاون.', en: 'Test: are chimeric organisms less related than clonal organisms? This measure does not establish weaker cooperation.' } });
 }
 
-fs.writeFileSync(rawPath, JSON.stringify(raw));
 const counts = Object.fromEntries(Object.entries(raw).map(([k, v]) => [k, v.length]));
-fs.writeFileSync(path.join(DATA, 'laws.json'), JSON.stringify({ updated: now(), counts, laws }));
-console.log(`added ${done} experiments; totals`, counts);
-for (const l of laws) console.log(l.id, l.verdict, l.fit ? JSON.stringify(l.fit) : '');
+const historicalCounts = Object.fromEntries(Object.entries(allRaw).map(([k, v]) => [k, v.length - counts[k]]));
+return { updated, modelVersion: MODEL_VERSION, protocolVersion: PROTOCOL_VERSION, counts, historicalCounts, laws };
+}
+
+export function runLaws({ dataDir = process.env.DATA_DIR || 'data', minutes = +(process.env.MINUTES ?? 25) } = {}) {
+  if (!Number.isFinite(minutes) || minutes < 0) throw new Error('MINUTES must be a finite nonnegative number.');
+  const rawPath = path.join(dataDir, 'laws-raw.json');
+  const raw = readRaw(rawPath);
+  const t0 = Date.now(), budget = minutes * 60 * 1000;
+  let done = 0;
+  while (Date.now() - t0 < budget * 0.92) {
+    // Balance the current protocol only; archived rows must not delay new evidence.
+    let experiment = null, best = Infinity;
+    for (const k in EXP) { const n = (raw[k] || []).filter(isCurrentEvidence).length / WEIGHT[k]; if (n < best) { best = n; experiment = k; } }
+    const ts = Date.now();
+    let res = null;
+    try { res = EXP[experiment](); } catch (e) { console.error(experiment, e.message); }
+    if (res) {
+      Object.assign(res, { modelVersion: MODEL_VERSION, protocolVersion: PROTOCOL_VERSION, at: now(), secs: Math.round((Date.now() - ts) / 1000) });
+      (raw[experiment] = raw[experiment] || []).push(res); done++;
+    }
+    console.log(`${experiment} done in ${((Date.now() - ts) / 1000).toFixed(0)} s`);
+  }
+  const summary = summarizeEvidence(raw);
+  fs.mkdirSync(dataDir, { recursive: true });
+  writeJSON(rawPath, raw);
+  writeJSON(path.join(dataDir, 'laws.json'), summary);
+  console.log(`added ${done} experiments; current totals`, summary.counts);
+  for (const l of summary.laws) console.log(l.id, l.verdict, l.fit ? JSON.stringify(l.fit) : '');
+  return summary;
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) runLaws();

@@ -1,13 +1,14 @@
 {
   "name": "genesis-evolution",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "Living evolution labs: a physics-based water column, a simplified origins model, and a herd breeding lab, plus a perpetual world and a laws observatory.",
   "engines": {
     "node": ">=20"
   },
   "scripts": {
-    "build:site": "python3 build.py",
+    "build:site": "python build.py",
+    "test": "node --test tests/*.test.cjs",
     "perpetual": "node runner/perpetual.mjs",
     "laws": "node runner/laws.mjs"
   }

@@ -8,6 +8,7 @@
 (function (root) {
 'use strict';
 
+const MODEL_VERSION = '2';
 function mulberry32(a) {
   return function () {
     a |= 0; a = a + 0x6D2B79F5 | 0;
@@ -475,7 +476,7 @@ class Origins {
       pr.e -= 0.0026 * (1 + 0.03 * pr.gape);
       if (pr.e > 2.6 && this.preds.length + born.length < 60) {
         pr.e /= 2;
-        born.push(this.makePred(pr.x + this.g() * 8, pr.y + this.g() * 8, pr.gape * Math.exp(this.g() * 0.15 + (this.rnd() < 0.05 ? 0.5 : 0)), pr.e));
+        born.push(this.makePred(pr.x + this.g() * 8, pr.y + this.g() * 8, pr.gape * Math.exp(this.g() * 0.15 + (this.rnd() < 0.05 ? (this.rnd() < 0.5 ? 0.5 : -0.5) : 0)), pr.e));
       }
     }
     this.preds = this.preds.filter(pr => pr.e > 0 && pr.age < pr.maxAge).concat(born);
@@ -665,7 +666,7 @@ class Origins {
   }
 }
 
-const API = { Origins, GENES, NG, ADH, SECR, SOMA, SINGLE, FIS, W, H, R, GX, GY, GS, CLASSES };
+const API = { MODEL_VERSION, Origins, GENES, NG, ADH, SECR, SOMA, SINGLE, FIS, W, H, R, GX, GY, GS, CLASSES };
 if (typeof module !== 'undefined' && module.exports) module.exports = API;
 root.GenesisOrigins = API;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

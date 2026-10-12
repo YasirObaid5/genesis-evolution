@@ -15,7 +15,7 @@ const L = {
     phys_t: 'زمن فيزيائي', bio_t: 'زمن بيولوجي', gens: 'جيل خلوي', cells: 'خلية', inOrg: 'داخل كائنات', preds: 'مفترس', flow: 'سرعة التيار (rms)',
     physics: 'الفيزياء', c_flow: 'الاقتران الهيدروديناميكي', c_flow_d: 'وزن الخلايا يحرّك الماء (معادلات ستوكس)',
     c_light: 'شدة الضوء عند السطح', c_turb: 'عكارة الماء', c_nut: 'إمداد الغذاء', c_source: 'مصدر الغذاء', src_mixed: 'في الماء', src_sed: 'من الرواسب',
-    c_stir: 'رجّ الوعاء', biology: 'الأحياء', c_pred: 'مفترسات (دوّارات)', c_pred_d: 'تبتلع أي كائن أصغر من فمها، وفمها يتطور',
+    c_stir: 'رجّ الوعاء', biology: 'الأحياء', c_pred: 'مفترسات (دوّارات)', c_pred_d: 'نجاح الالتقاط يعتمد على نسبة حجم الفريسة إلى الفم، والفم يتطور',
     c_ratio: 'مفترسات لكل 100 خلية', c_mut: 'معدل الطفرات لكل جين', c_clock: 'الساعة البيولوجية أسرع من الفيزيائية ×400',
     view: 'العرض', c_tracers: 'جسيمات تتبّع التيار', c_quiver: 'أسهم السرعة', c_color: 'التلوين',
     cb_lin: 'السلالة', cb_type: 'نوع الخلية (تكاثرية / جسدية)', cb_swim: 'قوة السباحة', cb_buoy: 'الطفو', cb_bond: 'متانة الرابطة',
@@ -53,7 +53,7 @@ const L = {
     phys_t: 'physical time', bio_t: 'biological time', gens: 'cell generations', cells: 'cells', inOrg: 'in organisms', preds: 'predators', flow: 'flow speed (rms)',
     physics: 'Physics', c_flow: 'Hydrodynamic coupling', c_flow_d: 'Cell weight moves the water (Stokes equations)',
     c_light: 'Surface light', c_turb: 'Water turbidity', c_nut: 'Nutrient supply', c_source: 'Nutrient source', src_mixed: 'In the water', src_sed: 'From sediment',
-    c_stir: 'Shake the jar', biology: 'Biology', c_pred: 'Predators (rotifers)', c_pred_d: 'They swallow any organism smaller than their mouth, and the mouth evolves',
+    c_stir: 'Shake the jar', biology: 'Biology', c_pred: 'Predators (rotifers)', c_pred_d: 'Capture depends on prey size relative to the evolving mouth',
     c_ratio: 'Predators per 100 cells', c_mut: 'Mutation rate per gene', c_clock: 'Biological clock runs ×400 faster than physics',
     view: 'View', c_tracers: 'Flow tracer particles', c_quiver: 'Velocity arrows', c_color: 'Colour by',
     cb_lin: 'Lineage', cb_type: 'Cell type (germ / soma)', cb_swim: 'Swimming force', cb_buoy: 'Buoyancy', cb_bond: 'Bond strength',
@@ -93,6 +93,7 @@ const t = (k) => (L[lang()][k] !== undefined ? L[lang()][k] : k);
 /* ---------------- state ---------------- */
 let seed = 777;
 let sim = new Column(seed);
+let resumedModel = null;
 let running = true, speed = 4, selected = null, follow = false, colorBy = 'lin', showTr = true, showQ = false;
 const cam = { z: 1, x: LX / 2, y: LZ / 2 };
 let banner = null, lastEv = -1, lastMs = 0, frame = 0;
@@ -521,7 +522,7 @@ const PRESETS = [
 ];
 function newSim(opts) {
   seed = (seed * 1103515245 + 12345) % 2147483647;
-  sim = new Column(seed, opts || {});
+  sim = new Column(seed, opts || {}); resumedModel = null;
   selected = null; follow = false; lastEv = -1; lastMs = 0; banner = null; cam.z = 1; cam.x = LX / 2; cam.y = LZ / 2;
 }
 function sync() {
@@ -535,7 +536,10 @@ function sync() {
   set('#cRatio', p.predRatio, p.predRatio.toFixed(1));
   set('#cMut', p.mut, p.mut.toFixed(2));
   $('#cColor').value = colorBy; $('#cTr').checked = showTr; $('#cQ').checked = showQ;
-  $('#cSeed').textContent = 'seed ' + seed;
+  $('#cSeed').textContent = 'seed ' + sim.seed;
+  const notice = $('#cModelNotice');
+  notice.hidden = !resumedModel;
+  notice.textContent = resumedModel ? (lang() === 'ar' ? 'استُؤنف عالم من نموذج سابق بالقواعد الحالية. هذه متابعة محلية؛ تغير الإصدار قد يؤثر في المسار.' : 'A world from an earlier model is continuing under the current rules. This local continuation may follow a different trajectory after the version change.') : '';
   legends();
 }
 function legends() {
@@ -608,7 +612,7 @@ function zoomAt(e, f) {
 
 function loop() {
   if (document.body.dataset.world === 'column') {
-    if (running && sim.cells.length) {
+    if (running && document.body.dataset.experimentRunning !== 'true' && sim.cells.length) {
       const t0 = performance.now();
       for (let i = 0; i < speed; i++) { sim.step(); if (performance.now() - t0 > 26) break; }
     }
@@ -624,7 +628,7 @@ bind(); applyLang();
 window.__column = {
   get sim() { return sim; }, cam,
   // load a saved world (from the perpetual run) and keep simulating it here
-  load(st) { sim = Column.fromState(st); selected = null; follow = false; lastEv = -1; lastMs = sim.t; banner = null; cam.z = 1; cam.x = LX / 2; cam.y = LZ / 2; sync(); updateTicker(true); renderCard(); drawCharts(); updateStatus(); },
+  load(st) { sim = Column.fromState(st); resumedModel = String(st.modelVersion || 'legacy') !== K.MODEL_VERSION; selected = null; follow = false; lastEv = -1; lastMs = sim.t; banner = null; cam.z = 1; cam.x = LX / 2; cam.y = LZ / 2; sync(); updateTicker(true); renderCard(); drawCharts(); updateStatus(); },
 };
 requestAnimationFrame(loop);
 })();

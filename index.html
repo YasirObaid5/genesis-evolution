@@ -232,6 +232,41 @@ body:not([data-world="herd"]) #world-herd, body:not([data-world="origins"]) #wor
 .pill.wait { border-color: var(--sand-3); color: var(--sand-2); }
 .ticker div.ms span { color: var(--sand); }
 @media (prefers-reduced-motion: reduce) { .preset, .btn { transition: none; } }
+.experiment-lab { margin-block: 14px; border-color: #665032; }
+.experiment-lab > summary { cursor: pointer; font-family: var(--display); font-size: 1.08rem; color: var(--saffron); padding-block: 4px; }
+.experiment-lab > summary small { font: .8rem var(--body); color: var(--sand-2); margin-inline-start: 16px; display: inline-block; }
+.x-intro { max-width: 95ch; color: var(--sand-2); }
+.x-settings { display: grid; grid-template-columns: 2fr repeat(3,1fr); gap: 12px; padding: 0; border: 0; margin: 16px 0 10px; min-width: 0; }
+.x-settings label, .x-notes { display: grid; gap: 6px; font-size: var(--fs-s); min-width: 0; }
+.x-settings input, .x-settings select, .x-notes textarea { width: 100%; min-width: 0; background: var(--ink-2); border: 1px solid var(--line); border-radius: 8px; padding: 9px 10px; color: var(--sand); font: inherit; }
+.x-notes textarea { resize: vertical; }
+.x-conditions { border-inline-start: 3px solid var(--saffron); padding-inline-start: 12px; }
+.x-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-block: 12px; }
+.x-actions .btn { min-height: 40px; }
+.experiment-lab button:disabled { opacity: .45; cursor: not-allowed; }
+#xProgress { display: block; width: 100%; height: 7px; accent-color: var(--saffron); }
+#xStatus { min-height: 1.5em; font-size: var(--fs-s); }
+.x-metrics { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; margin-block: 16px; }
+.x-metrics article { background: var(--ink-2); padding: 12px; border-radius: 8px; display: grid; gap: 6px; }
+.x-metrics b { font: 1.4rem var(--mono); color: var(--saffron); text-align: start; }
+.x-metrics b span { font: .9rem var(--body); }
+.x-metrics span, .x-metrics small { font-size: var(--fs-s); }
+.x-metrics small { color: var(--sand-2); }
+.x-chart-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.x-chart-head h3 { font-size: var(--fs-m); font-weight: 500; }
+#xChart { display: block; width: 100%; max-height: 300px; background: #0b1418; border: 1px solid var(--line); border-radius: 8px; direction: ltr; }
+.x-table-wrap { margin-block: 14px; overflow-x: auto; }
+.x-table-wrap summary { cursor: pointer; font-size: var(--fs-s); }
+.x-table-wrap table { border-collapse: collapse; width: 100%; margin-top: 12px; font-size: var(--fs-s); }
+.x-table-wrap th, .x-table-wrap td { padding: 8px; text-align: start; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.x-table-wrap caption { text-align: start; color: var(--sand-2); padding-block: 6px; }
+.x-notebook { display: grid; gap: 8px; }
+.x-notebook article { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; border: 1px solid var(--line); padding: 10px; border-radius: 8px; }
+.x-notebook article p { margin: 0; overflow-wrap: anywhere; }
+.x-notebook article small { color: var(--sand-2); }
+.x-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+@media(max-width:700px) { .x-settings { grid-template-columns: repeat(2,minmax(0,1fr)); } .x-metrics { grid-template-columns: 1fr; } .experiment-lab > summary small { display: block; margin-inline-start: 0; margin-block-start: 4px; } }
+
 </style>
 
 <header class="bar">
@@ -435,6 +470,7 @@ body:not([data-world="herd"]) #world-herd, body:not([data-world="origins"]) #wor
   <section class="intro">
     <p data-b18n-html="intro"></p>
     <p class="note" id="bSource"></p>
+    <p class="note warn" id="bModelNotice"></p>
   </section>
 
   <div class="obs-grid">
@@ -475,6 +511,7 @@ body:not([data-world="herd"]) #world-herd, body:not([data-world="origins"]) #wor
     </section>
     <section class="panel span2">
       <h2><span data-b18n="laws">قوانين التطور: النظرية مقابل التجربة</span><small id="bLawsMeta"></small></h2>
+      <p class="note" id="bLawsNotice" role="status"></p>
       <div class="laws" id="bLaws"></div>
     </section>
     <section class="panel span2">
@@ -508,6 +545,43 @@ body:not([data-world="herd"]) #world-herd, body:not([data-world="origins"]) #wor
     <p data-c18n-html="c_intro"></p>
     <button class="btn" id="cIntroClose" data-i18n="hide">إخفاء</button>
   </section>
+
+  <p id="cModelNotice" class="note warn" role="status" hidden></p>
+  <details class="panel experiment-lab" id="xLab">
+  <summary><span data-x18n="title">ماذا لو أعدنا شريط الحياة؟</span><small data-x18n="subtitle">تجربتان · بداية واحدة · عامل مختلف</small></summary>
+  <p class="x-intro" data-x18n="intro"></p>
+  <form id="xForm">
+    <fieldset id="xSettings" class="x-settings">
+      <legend class="x-sr" data-x18n="settings"></legend>
+      <label for="xFactor"><span data-x18n="factor"></span><select id="xFactor"><option value="predators" data-x18n="predators"></option><option value="flow" data-x18n="flow"></option><option value="source" data-x18n="source"></option><option value="light" data-x18n="light"></option></select></label>
+      <label for="xSeed"><span data-x18n="seed"></span><input id="xSeed" type="number" min="1" max="2147483646" step="1" value="777" required dir="ltr"></label>
+      <label for="xRepeats"><span data-x18n="repeats"></span><input id="xRepeats" type="number" min="1" max="12" step="1" value="3" required dir="ltr"></label>
+      <label for="xSteps"><span data-x18n="steps"></span><input id="xSteps" type="number" min="100" max="36000" step="100" value="5000" required dir="ltr"></label>
+    </fieldset>
+    <p id="xConditions" class="x-conditions"></p>
+    <p class="note" data-x18n="protocol"></p>
+    <div class="x-actions"><button class="btn on" id="xRun" type="submit" data-x18n="run"></button><button class="btn" id="xCancel" type="button" disabled data-x18n="cancel"></button></div>
+  </form>
+  <progress id="xProgress" max="1" value="0" aria-label="Experiment progress"></progress>
+  <p id="xStatus" role="status" aria-live="polite"></p>
+  <section id="xResults" hidden aria-labelledby="xResultTitle">
+    <h2 id="xResultTitle" data-x18n="results"></h2>
+    <p class="note" id="xResultConfig"></p>
+    <div class="x-metrics" id="xMetrics"></div>
+    <div class="x-chart-head"><h3 data-x18n="trajectory"></h3><div id="xLegend" class="leg"></div></div>
+    <svg id="xChart" viewBox="0 0 760 230" role="img" aria-labelledby="xChartTitle"></svg>
+    <p class="note" data-x18n="chartNote"></p>
+    <details class="x-table-wrap"><summary data-x18n="individual"></summary><table><caption id="xTableCaption"></caption><thead id="xTableHead"></thead><tbody id="xTableBody"></tbody></table></details>
+    <p class="note" id="xInterpretation"></p>
+    <label class="x-notes" for="xNotes"><span data-x18n="notes"></span><textarea id="xNotes" maxlength="1000" rows="2"></textarea></label>
+    <div class="x-actions"><button class="btn on" id="xSave" type="button" disabled data-x18n="save"></button><button class="btn" id="xCSV" type="button" disabled data-x18n="csv"></button><button class="btn" id="xJSON" type="button" disabled data-x18n="json"></button></div>
+  </section>
+  <div class="divider"></div>
+  <h2 data-x18n="notebook"></h2>
+  <p class="note" data-x18n="local"></p>
+  <p id="xNotebookStatus" role="status" aria-live="polite"></p>
+  <div id="xNotebook" class="x-notebook"></div>
+</details>
 
   <main class="lab">
     <aside class="col controls">
@@ -2019,6 +2093,7 @@ requestAnimationFrame(loop);
 (function (root) {
 'use strict';
 
+const MODEL_VERSION = '2';
 function mulberry32(a) {
   return function () {
     a |= 0; a = a + 0x6D2B79F5 | 0;
@@ -2486,7 +2561,7 @@ class Origins {
       pr.e -= 0.0026 * (1 + 0.03 * pr.gape);
       if (pr.e > 2.6 && this.preds.length + born.length < 60) {
         pr.e /= 2;
-        born.push(this.makePred(pr.x + this.g() * 8, pr.y + this.g() * 8, pr.gape * Math.exp(this.g() * 0.15 + (this.rnd() < 0.05 ? 0.5 : 0)), pr.e));
+        born.push(this.makePred(pr.x + this.g() * 8, pr.y + this.g() * 8, pr.gape * Math.exp(this.g() * 0.15 + (this.rnd() < 0.05 ? (this.rnd() < 0.5 ? 0.5 : -0.5) : 0)), pr.e));
       }
     }
     this.preds = this.preds.filter(pr => pr.e > 0 && pr.age < pr.maxAge).concat(born);
@@ -2676,7 +2751,7 @@ class Origins {
   }
 }
 
-const API = { Origins, GENES, NG, ADH, SECR, SOMA, SINGLE, FIS, W, H, R, GX, GY, GS, CLASSES };
+const API = { MODEL_VERSION, Origins, GENES, NG, ADH, SECR, SOMA, SINGLE, FIS, W, H, R, GX, GY, GS, CLASSES };
 if (typeof module !== 'undefined' && module.exports) module.exports = API;
 root.GenesisOrigins = API;
 })(typeof globalThis !== 'undefined' ? globalThis : this);
@@ -3400,7 +3475,7 @@ requestAnimationFrame(loop);
 })();
 
 </script>
-<script>
+<script id="column-engine">
 /* ===================================================================
    GENESIS · WATER COLUMN — physics-first evolution of multicellularity
    Units: micrometres (µm), seconds (s), piconewtons (pN).
@@ -3424,6 +3499,7 @@ requestAnimationFrame(loop);
 (function (root) {
 'use strict';
 
+const MODEL_VERSION = '2';
 
 /* ---------- physical constants ---------- */
 const ETA = 1e-3;                 // water viscosity, pN·s/µm² (= 1 mPa·s)
@@ -3502,7 +3578,7 @@ class Column {
     this.head = new Int32Array(HX * HZ); this.next = new Int32Array(8192);
   }
 
-  /* mulberry32 with its state held on the instance, so a run can be saved and resumed exactly */
+  /* mulberry32 state is persisted; rounded snapshots still resume approximately */
   seedRng(seed) {
     this._rs = seed | 0;
     this.rnd = () => {
@@ -3619,8 +3695,13 @@ class Column {
   makePred(x, z, gape, e) {
     return { id: this.nextId++, x, z, e, gape: Math.max(10, gape), age: 0, maxAge: 2600 + this.rnd() * 1400, digest: 0, phase: this.rnd() * 6.28, target: null, flash: 0, h: this.rnd() * 6.28 };
   }
-  predTarget() { return Math.max(2, Math.min(48, Math.round(this.p.predRatio * this.cells.length / 100))); }
+  predTarget() { return this.p.predators ? Math.max(0, Math.min(48, Math.round(this.p.predRatio * this.cells.length / 100))) : 0; }
   colonyDiameter(n) { return 2 * A * Math.pow(n, DF); }
+  captureEfficiency(diameter, gape) {
+    const r = diameter / gape;
+    // Simplified, uncalibrated prey-size window: peak capture at half the gape, zero at either edge.
+    return r > 0 && r < 1 ? 16 * r * r * (1 - r) * (1 - r) : 0;
+  }
 
   /* ---------- grid helpers ---------- */
   sample(F, x, z) {
@@ -3955,6 +4036,8 @@ class Column {
   }
 
   stepPredators(deaths) {
+    const P = this.preds, target = this.predTarget();
+    if (P.length > target) { P.sort((a, b) => b.e - a.e); P.length = target; }
     for (const pr of this.preds) {
       pr.age++; pr.phase += 0.15; if (pr.flash > 0) pr.flash--;
       const speed = 80 / (1 + pr.gape / 60);
@@ -3965,23 +4048,28 @@ class Column {
           let best = null, bs = 0;
           for (const col of this.colonies.values()) {
             const n = col.cells.length;
-            if (this.colonyDiameter(n) > pr.gape) continue;
+            const efficiency = this.captureEfficiency(this.colonyDiameter(n), pr.gape);
+            if (!efficiency || col.eaten) continue;
             const dx = dxMin(col.cx - pr.x), dz = col.cz - pr.z, d2 = dx * dx + dz * dz;
             if (d2 > 200 * 200) continue;
-            const s = n / (d2 + 2500); if (s > bs) { bs = s; best = col; }
+            const s = n * efficiency / (d2 + 2500); if (s > bs) { bs = s; best = col; }
           }
           pr.target = best;
         }
         const tg = pr.target;
-        if (tg && tg.alive && this.colonyDiameter(tg.cells.length) <= pr.gape) {
+        if (tg && tg.alive && !tg.eaten && this.colonyDiameter(tg.cells.length) < pr.gape) {
           const dx = dxMin(tg.cx - pr.x), dz = tg.cz - pr.z, d = Math.hypot(dx, dz) || 1;
           pr.h = Math.atan2(dz, dx);
           sx = dx / d * speed; sz = dz / d * speed;
           if (d < 20 + this.colonyDiameter(tg.cells.length) / 2 + speed * DT * 0.5) {
             const n = tg.cells.length;
-            tg.eaten = true;
-            for (const c of tg.cells) if (c.alive) { c.alive = false; deaths.push(c); this.C[this.nodeOf(c.x, c.z)] += 0.5 * c.b / (VNODE * 2.5e-6); }
-            pr.e += n * 0.18; pr.digest = 40 + n * 3; pr.flash = 14; this.eaten += n; pr.target = null;
+            pr.digest = 4; // Failed attacks still consume handling time and maintenance energy.
+            if (this.rnd() < this.captureEfficiency(this.colonyDiameter(n), pr.gape)) {
+              tg.eaten = true;
+              for (const c of tg.cells) if (c.alive) { c.alive = false; deaths.push(c); this.C[this.nodeOf(c.x, c.z)] += 0.5 * c.b / (VNODE * 2.5e-6); }
+              pr.e += n * 0.18; pr.digest = 40 + n * 3; pr.flash = 14; this.eaten += n;
+            }
+            pr.target = null;
           }
         } else {
           pr.h += this.g() * 0.25; sx = Math.cos(pr.h) * speed * 0.6; sz = Math.sin(pr.h) * speed * 0.6;
@@ -3993,15 +4081,12 @@ class Column {
       pr.e = Math.max(0, pr.e - 0.0032 * (1 + pr.gape / 40));
     }
     // predator turnover (Moran process): the best-fed predator replaces the hungriest one
-    const P = this.preds;
-    const target = this.predTarget();
     while (P.length < target) P.push(this.makePred(this.rnd() * LX, 200 + this.rnd() * (LZ - 400), P.length ? P[0].gape : 13, 1));
-    if (P.length > target) { P.sort((a, b) => b.e - a.e); P.length = target; }
     if (this.t % 60 === 0 && P.length > 1) {
       let hi = P[0], lo = P[0];
       for (const pr of P) { if (pr.e > hi.e) hi = pr; if (pr.e < lo.e) lo = pr; }
       if (hi !== lo && hi.e > lo.e + 0.3) {
-        const child = this.makePred(hi.x, hi.z, hi.gape * Math.exp(this.g() * 0.07 + (this.rnd() < 0.04 ? 0.25 : 0)), hi.e / 2);
+        const child = this.makePred(hi.x, hi.z, hi.gape * Math.exp(this.g() * 0.07 + (this.rnd() < 0.04 ? (this.rnd() < 0.5 ? 0.25 : -0.25) : 0)), hi.e / 2);
         hi.e /= 2;
         P[P.indexOf(lo)] = child;
       }
@@ -4175,7 +4260,7 @@ class Column {
     const preds = this.preds.map(p => [p.id, r3(p.x), r3(p.z), r6(p.e), r6(p.gape), p.age, p.maxAge, p.digest, r3(p.h)]);
     const arch = Array.from(this.archive.values()).slice(-6000).map(r => [r.id, r.parent, r.gen, r.born, r.died, r.peak, r3(r.hue), r.repro]);
     return {
-      v: 1, seed: this.seed, rs: this._rs, t: this.t, p: this.p,
+      v: 1, modelVersion: MODEL_VERSION, seed: this.seed, rs: this._rs, t: this.t, p: this.p,
       next: [this.nextId, this.nextCol, this.nextGeno],
       counters: { born: this.born, eaten: this.eaten, fractures: this.fractures, fracShear: this.fracShear, fracPack: this.fracPack, gens: this.gens, nAvg: this.nAvg, _bornSeen: this.born },
       C: Array.from(this.C, r6), cells, cols, preds, arch,
@@ -4213,14 +4298,21 @@ class Column {
     return sim;
   }
 
-  /* slow environmental change for long runs: a bounded random walk of the "climate" */
+  /* Mean-reverting climate around reference conditions; reflecting bounds avoid clipping. */
   climate(rate = 1) {
-    const walk = (k, sd, lo, hi) => { this.p[k] = Math.min(hi, Math.max(lo, this.p[k] + this.g() * sd * rate)); };
-    walk('light', 0.05, 0.4, 1.4);
-    walk('turbidity', 0.00006, 0.0004, 0.002);
-    walk('nutrient', 0.05, 0.5, 1.6);
-    walk('predRatio', 0.15, 0.5, 5);
-    if (this.rnd() < 0.005 * rate) this.p.source = this.p.source === 'mixed' ? 'sediment' : 'mixed';
+    if (!Number.isFinite(rate) || rate < 0) throw new RangeError('Climate rate must be finite and non-negative');
+    if (!rate) return;
+    const retention = Math.exp(-0.08 * rate), noise = Math.sqrt((1 - retention * retention) / 0.16);
+    const walk = (k, mean, sd, lo, hi) => {
+      const x = mean + (this.p[k] - mean) * retention + this.g() * sd * noise, width = hi - lo;
+      const reflected = ((x - lo) % (2 * width) + 2 * width) % (2 * width);
+      this.p[k] = lo + (reflected <= width ? reflected : 2 * width - reflected);
+    };
+    walk('light', 1, 0.05, 0.4, 1.4);
+    walk('turbidity', 0.0012, 0.00006, 0.0004, 0.002);
+    walk('nutrient', 1, 0.05, 0.5, 1.6);
+    walk('predRatio', 3, 0.15, 0, 5);
+    if (this.rnd() < 1 - Math.exp(-0.005 * rate)) this.p.source = this.p.source === 'mixed' ? 'sediment' : 'mixed';
   }
 
   stir() {
@@ -4235,10 +4327,347 @@ class Column {
   }
 }
 
-const API = { Column, GENES, NG, ADH, SOMA, SWIM, BOND, BUOY, LX, LZ, NX, NZ, DX, A, ETA, WPP, ZETA1, DF, F0, D_N, DT, B_GYRO, HSL };
+const API = { MODEL_VERSION, Column, GENES, NG, ADH, SOMA, SWIM, BOND, BUOY, LX, LZ, NX, NZ, DX, A, ETA, WPP, ZETA1, DF, F0, D_N, DT, B_GYRO, HSL };
 if (typeof module !== 'undefined' && module.exports) module.exports = API;
 root.GenesisColumn = API;
 })(typeof globalThis !== 'undefined' ? globalThis : this);
+
+</script>
+<script id="experiment-engine">
+/* Paired water-column experiments: one treatment, identical initial state. */
+(function (root) {
+'use strict';
+const engine = typeof module !== 'undefined' && module.exports ? require('./column.js') : root.GenesisColumn;
+const MODEL = 'water-column/' + (engine.MODEL_VERSION || '1');
+const PROTOCOL_VERSION = 1;
+const MAX_SEED = 2147483646;
+const BASELINE = Object.freeze({ predators: true, predRatio: 3, flow: true, light: 1,
+  turbidity: 0.0012, nutrient: 1, source: 'mixed', acc: 400, mut: 0.08, cap: 3200 });
+const FACTORS = Object.freeze({
+  predators: Object.freeze({ a: true, b: false }),
+  flow: Object.freeze({ a: true, b: false }),
+  source: Object.freeze({ a: 'mixed', b: 'sediment' }),
+  light: Object.freeze({ a: 1, b: 0.5 }),
+});
+const METRICS = Object.freeze(['cells', 'inGroups', 'adhesion', 'meanSize', 'gape', 'generations']);
+
+function integer(value, min, max, name) {
+  if (!Number.isInteger(value) || value < min || value > max) throw new RangeError(name + ' must be an integer from ' + min + ' to ' + max);
+  return value;
+}
+function validateConfig(config) {
+  if (!config || typeof config !== 'object' || Array.isArray(config)) throw new TypeError('Experiment configuration required');
+  if (!Object.prototype.hasOwnProperty.call(FACTORS, config.factor)) throw new RangeError('Unknown experiment factor');
+  return { seed: integer(config.seed, 1, MAX_SEED, 'seed'), repeats: integer(config.repeats, 1, 12, 'repeats'),
+    steps: integer(config.steps, 100, 36000, 'steps'), factor: config.factor };
+}
+function createPair(input, repIndex = 0) {
+  const config = validateConfig(input);
+  integer(repIndex, 0, config.repeats - 1, 'repIndex');
+  const seed = (config.seed - 1 + repIndex) % MAX_SEED + 1;
+  const a = new engine.Column(seed, BASELINE), b = new engine.Column(seed, BASELINE);
+  // Applying treatment after construction preserves initialization and RNG state in both arms.
+  b.setParam(config.factor, FACTORS[config.factor].b);
+  if (config.factor === 'predators') b.preds.length = 0;
+  return { seed, a, b, conditions: FACTORS[config.factor] };
+}
+function sample(sim) {
+  const st = sim.computeStats(), extinct = sim.cells.length === 0;
+  return { step: sim.t, cells: st.n, inGroups: extinct ? 0 : st.inGroups,
+    adhesion: extinct ? 0 : st.mg[engine.ADH], meanSize: extinct ? 0 : st.meanSize,
+    gape: st.gape, generations: sim.gens, extinct };
+}
+function checkSample(point) {
+  if (!point || typeof point !== 'object') throw new TypeError('Experiment sample required');
+  integer(point.step, 0, 36000, 'sample step');
+  for (const key of METRICS) if (!Number.isFinite(point[key]) || point[key] < 0) throw new RangeError('Invalid sample ' + key);
+  if (!Number.isInteger(point.cells) || point.inGroups > 1 || point.adhesion > 1 || typeof point.extinct !== 'boolean' || point.extinct !== (point.cells === 0)) throw new RangeError('Invalid sample population');
+  return point;
+}
+function maximumObserved(arm) {
+  let maximum = checkSample(arm).inGroups;
+  if (arm.trajectory !== undefined) {
+    if (!Array.isArray(arm.trajectory) || arm.trajectory.length > 36001) throw new RangeError('Invalid trajectory length');
+    for (const point of arm.trajectory) maximum = Math.max(maximum, checkSample(point).inGroups);
+  }
+  return maximum;
+}
+function distribution(values) {
+  const n = values.length;
+  if (!n) return { mean: null, min: null, max: null, se: null };
+  const mean = values.reduce((sum, value) => sum + value, 0) / n;
+  const variance = n > 1 ? values.reduce((sum, value) => sum + (value - mean) ** 2, 0) / (n - 1) : null;
+  return { mean, min: Math.min(...values), max: Math.max(...values), se: n > 1 ? Math.sqrt(variance / n) : null };
+}
+function summarize(runs) {
+  if (!Array.isArray(runs) || runs.length > 12) throw new RangeError('Invalid number of paired runs');
+  const result = { n: runs.length, a: { extinctions: 0, transitions: 0, means: {} },
+    b: { extinctions: 0, transitions: 0, means: {} }, difference: {} };
+  for (const run of runs) {
+    integer(run.seed, 1, MAX_SEED, 'run seed');
+    for (const arm of ['a', 'b']) {
+      if (maximumObserved(run[arm]) >= 0.5) result[arm].transitions++;
+      if (run[arm].extinct) result[arm].extinctions++;
+    }
+  }
+  for (const key of METRICS) {
+    for (const arm of ['a', 'b']) result[arm].means[key] = distribution(runs.map(run => run[arm][key])).mean;
+    result.difference[key] = distribution(runs.map(run => run.b[key] - run.a[key]));
+  }
+  return result;
+}
+function csvCell(value) {
+  let text = String(value);
+  if (typeof value === 'string' && /^[=+\-@\t\r]/.test(text)) text = "'" + text;
+  return '"' + text.replace(/"/g, '""') + '"';
+}
+function toCSV(record) {
+  const config = validateConfig(record.config);
+  summarize(record.runs);
+  if (record.runs.length > config.repeats) throw new RangeError('Too many runs for configuration');
+  const model = record.model === undefined ? MODEL : record.model;
+  const protocol = record.protocolVersion === undefined ? PROTOCOL_VERSION : record.protocolVersion;
+  if (typeof model !== 'string' || model.length > 80) throw new RangeError('Invalid model version');
+  integer(protocol, 1, 1000000, 'protocol version');
+  const complete = record.complete === undefined ? record.runs.length === config.repeats : record.complete;
+  const rows = [['model', 'protocolVersion', 'initialSeed', 'requestedRepeats', 'completedRepeats', 'complete', 'requestedSteps', 'factor',
+    'repeat', 'seed', 'arm', 'condition', 'step', ...METRICS, 'extinct', 'maxObservedInGroups', 'observedTransition']];
+  record.runs.forEach((run, index) => {
+    for (const arm of ['a', 'b']) rows.push([model, protocol, config.seed, config.repeats, record.runs.length, complete, config.steps, config.factor,
+      index + 1, run.seed, arm, FACTORS[config.factor][arm], run[arm].step, ...METRICS.map(key => run[arm][key]),
+      run[arm].extinct, maximumObserved(run[arm]), maximumObserved(run[arm]) >= 0.5]);
+  });
+  return rows.map(row => row.map(csvCell).join(',')).join('\r\n') + '\r\n';
+}
+const API = { MODEL, PROTOCOL_VERSION, BASELINE, FACTORS, METRICS, validateConfig, createPair, sample, summarize, toCSV };
+if (typeof module !== 'undefined' && module.exports) module.exports = API;
+root.GenesisExperiments = API;
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+</script>
+<script id="experiment-worker" type="text/plain">
+'use strict';
+self.onmessage = function (event) {
+  try {
+    const E = self.GenesisExperiments;
+    const config = E.validateConfig(event.data.config);
+    const runs = [], interval = Math.max(20, Math.ceil(config.steps / 100));
+    for (let repeat = 0; repeat < config.repeats; repeat++) {
+      const pair = E.createPair(config, repeat);
+      const paths = { a: [E.sample(pair.a)], b: [E.sample(pair.b)] };
+      for (let step = 1; step <= config.steps; step++) {
+        if (pair.a.cells.length) pair.a.step();
+        if (pair.b.cells.length) pair.b.step();
+        const extinct = !pair.a.cells.length && !pair.b.cells.length;
+        if (step % interval === 0 || step === config.steps || extinct) {
+          for (const arm of ['a', 'b']) {
+            const sample = E.sample(pair[arm]);
+            if (paths[arm][paths[arm].length - 1].step !== sample.step) paths[arm].push(sample);
+          }
+          self.postMessage({ type: 'progress', repeat: repeat + 1, step, total: config.steps, repeats: config.repeats });
+        }
+        if (extinct) break;
+      }
+      const run = { seed: pair.seed };
+      for (const arm of ['a', 'b']) run[arm] = { ...E.sample(pair[arm]), trajectory: paths[arm] };
+      runs.push(run);
+      self.postMessage({ type: 'replicate', run });
+    }
+    self.postMessage({ type: 'done', runs, summary: E.summarize(runs) });
+  } catch (error) {
+    self.postMessage({ type: 'error', message: String(error.message || error) });
+  }
+};
+
+</script>
+<script>
+(function () {
+'use strict';
+const E = GenesisExperiments, $ = id => document.getElementById(id);
+const KEY = 'genesis.experiments.v1';
+const L = {
+  ar: {
+    title: 'ماذا لو أعدنا شريط الحياة؟', subtitle: 'تجربتان · بداية واحدة · عامل مختلف', settings: 'إعدادات المقارنة',
+    intro: 'ابدأ بنسختين من المجتمع نفسه، ثم غيّر شرطًا واحدًا. كرّر المقارنة ببدايات مختلفة لترى ما يتكرر وما يتغير. هذه التجارب مستقلة عن العمود الحي أسفل الصفحة.',
+    factor: 'العامل الذي نغيّره', seed: 'بذرة البداية', repeats: 'عدد التكرارات', steps: 'خطوات كل تجربة',
+    predators: 'وجود المفترسات', flow: 'حركة الماء', source: 'مصدر الغذاء', light: 'شدة الضوء',
+    conditions: { predators: ['مع مفترسات', 'بلا مفترسات'], flow: ['ماء متحرك', 'بلا اقتران مائي'], source: ['غذاء في الماء', 'غذاء من الرواسب'], light: ['ضوء كامل', 'نصف شدة الضوء'] },
+    protocol: 'إعدادات البركة الافتراضية ثابتة؛ يتغير العامل المختار فقط. تبدأ البذور من الرقم المحدد وتزيد واحدًا لكل تكرار. الخطوة = نصف ثانية فيزيائية، والبيولوجيا أسرع ×400. تتباعد الأحداث العشوائية بعد التدخل؛ المطابقة تخص البداية فقط. التجارب الأطول قد تستغرق دقائق.',
+    run: 'ابدأ المقارنة', cancel: 'إلغاء التشغيل', ready: 'اختر سؤالًا وابدأ التجربة.', running: 'جارٍ التشغيل', repeat: 'التكرار', step: 'الخطوة',
+    completed: 'اكتملت المقارنة. يمكنك حفظها أو تنزيل بياناتها.', cancelled: 'أُلغي التشغيل. يمكنك تنزيل التكرارات المكتملة كبيانات جزئية.', failed: 'تعذّر إكمال التجربة. يمكنك تنزيل التكرارات المكتملة؛ جرّب مدة أقصر أو متصفحًا حديثًا.', invalid: 'تحقق من البذرة وعدد التكرارات والخطوات.',
+    results: 'نتائج المقارنة', paired: 'متوسط الفرق: B − A', pp: 'نقطة مئوية', cells: 'خلية', groups: 'الخلايا داخل كائنات', population: 'عدد الخلايا النهائي', extinctions: 'تجارب انتهت بالانقراض', range: 'مدى الفروق المرصودة',
+    trajectory: 'نسبة الخلايا داخل كائنات · آخر تكرار مكتمل', chartNote: 'المحور الأفقي: خطوات المحاكاة. المحور الرأسي: نسبة الخلايا داخل كائنات متعددة الخلايا. الصفر عند الانقراض يعني غياب الخلايا، ولا يعني عودتها إلى حياة منفردة.',
+    individual: 'افتح نتائج كل تكرار', endpoint: 'القياسات عند نهاية التجربة', arm: 'الحالة', adhesion: 'الالتصاق', size: 'الحجم المرجّح بالخلايا', extinct: 'منقرض', alive: 'باقٍ', state: 'الحالة',
+    caution: 'هذه فروق داخل النموذج وليست إثباتًا عن الطبيعة. يشمل الملخص التجارب المنقرضة. زد التكرارات والمدة لفحص استقرار النتيجة؛ المدى المعروض ليس فاصل ثقة.',
+    single: 'تكرار واحد لا يكفي لتقدير تباين النتائج.', partial: 'نتائج جزئية للتكرارات المكتملة فقط.',
+    notes: 'توقّعك وملاحظاتك', save: 'احفظ في دفتر التجارب', csv: 'تنزيل CSV', json: 'تنزيل التجربة كاملة', notebook: 'دفتر التجارب',
+    local: 'يُحفظ الدفتر في هذا المتصفح فقط، حتى 12 تجربة. نزّل نسخة للاحتفاظ بها خارج المتصفح؛ مسح بياناته يزيل الدفتر.',
+    empty: 'لا توجد تجارب محفوظة بعد.', saved: 'حُفظت التجربة في هذا المتصفح.', storageError: 'تعذّر حفظ الدفتر. لم نستبدل البيانات السابقة؛ يمكنك تنزيل التجربة.', corrupt: 'تعذّرت قراءة الدفتر. البيانات السابقة محفوظة دون تغيير؛ استخدم التنزيل لحفظ النتائج الجديدة.', full: 'الدفتر ممتلئ. نزّل تجربة ثم احذفها لإتاحة مكان.',
+    open: 'عرض', rerun: 'إعادة التجربة', remove: 'حذف', confirmDelete: 'حذف هذه التجربة من دفتر هذا المتصفح؟ نزّلها أولًا إذا أردت الاحتفاظ بها.', removed: 'حُذفت التجربة من الدفتر.', old: 'هذه تجربة من إصدار سابق؛ إعادة تشغيلها تستخدم النموذج الحالي.', model: 'إصدار النموذج', protocolVersion: 'بروتوكول المقارنة', progress: 'تقدم التجربة'
+  },
+  en: {
+    title: 'What if we replayed life?', subtitle: 'Two worlds · one beginning · one changed condition', settings: 'Comparison settings',
+    intro: 'Start with two copies of the same population, then change one condition. Repeat with different starting seeds to see what persists. These experiments are independent of the live column below.',
+    factor: 'Condition to change', seed: 'Starting seed', repeats: 'Replicates', steps: 'Steps per experiment',
+    predators: 'Predator presence', flow: 'Water movement', source: 'Nutrient source', light: 'Light intensity',
+    conditions: { predators: ['With predators', 'Without predators'], flow: ['Flow enabled', 'Hydrodynamics disabled'], source: ['Nutrients in water', 'Nutrients from sediment'], light: ['Full light', 'Half light'] },
+    protocol: 'Default pond settings are fixed; only the selected condition changes. Seeds increase by one per replicate. Each step is 0.5 physical seconds; biology runs ×400 faster. Random events diverge after treatment; only initialization is matched. Longer experiments may take minutes.',
+    run: 'Start comparison', cancel: 'Cancel run', ready: 'Choose a question and start an experiment.', running: 'Running', repeat: 'Replicate', step: 'Step',
+    completed: 'Comparison complete. Save it or download the data.', cancelled: 'Run cancelled. Completed replicates can be downloaded as partial data.', failed: 'Could not finish the experiment. Completed replicates can be downloaded; try a shorter run or a modern browser.', invalid: 'Check the seed, replicate count and step count.',
+    results: 'Comparison results', paired: 'Mean difference: B − A', pp: 'percentage points', cells: 'cells', groups: 'Cells in multicellular organisms', population: 'Final cell population', extinctions: 'Runs ending in extinction', range: 'Observed difference range',
+    trajectory: 'Cells in organisms · last completed replicate', chartNote: 'Horizontal: simulation steps. Vertical: share of cells in multicellular organisms. Zero at extinction means no cells remain, not a return to single-cell life.',
+    individual: 'Show every replicate', endpoint: 'Measurements at the end of each experiment', arm: 'Arm', adhesion: 'Adhesion', size: 'Cell-weighted organism size', extinct: 'Extinct', alive: 'Surviving', state: 'State',
+    caution: 'These are differences inside the model, not proof about nature. Extinct runs are included. Increase replicates and duration to examine stability; the observed range is not a confidence interval.',
+    single: 'One replicate cannot estimate variation between runs.', partial: 'Partial results from completed replicates only.',
+    notes: 'Your prediction and notes', save: 'Save to notebook', csv: 'Download CSV', json: 'Download full experiment', notebook: 'Experiment notebook',
+    local: 'Saved in this browser only, up to 12 experiments. Download a copy to keep it outside the browser; clearing browser data removes this notebook.',
+    empty: 'No saved experiments yet.', saved: 'Saved in this browser.', storageError: 'Could not save the notebook. Previous data was not replaced; you can download the experiment.', corrupt: 'Could not read the notebook. Previous data is unchanged; download new results to keep them.', full: 'Notebook full. Download and remove an experiment to make room.',
+    open: 'View', rerun: 'Run again', remove: 'Remove', confirmDelete: 'Remove this experiment from this browser? Download it first if you want to keep it.', removed: 'Experiment removed from notebook.', old: 'This experiment used an older version; running it again uses the current model.', model: 'Model version', protocolVersion: 'Comparison protocol', progress: 'Experiment progress'
+  }
+};
+const lang = () => document.documentElement.lang === 'en' ? 'en' : 'ar';
+const t = k => L[lang()][k];
+const make = (tag, text, cls) => { const n = document.createElement(tag); if (text !== undefined) n.textContent = text; if (cls) n.className = cls; return n; };
+const num = (x, digits = 1) => Number.isFinite(x) ? x.toFixed(digits) : '—';
+let worker = null, current = null, notebook = [], notebookOK = true, status = 'ready', progress = null;
+function configFromForm() { return E.validateConfig({ factor: $('xFactor').value, seed: +$('xSeed').value, repeats: +$('xRepeats').value, steps: +$('xSteps').value }); }
+function describe(c) { return `${t(c.factor)} · ${t('seed')} ${c.seed} · ${c.repeats} × ${c.steps}`; }
+function validateRecord(r) {
+  if (!r || r.v !== 1 || typeof r.id !== 'string' || r.id.length > 80 || typeof r.created !== 'string' || !Number.isFinite(Date.parse(r.created)) || typeof r.model !== 'string' || r.model.length > 80 || !Number.isInteger(r.protocolVersion) || r.protocolVersion < 1 || typeof r.notes !== 'string' || r.notes.length > 1000 || !Array.isArray(r.runs)) throw new Error('record');
+  const c = E.validateConfig(r.config);
+  if (r.runs.length !== c.repeats) throw new Error('incomplete');
+  for (const run of r.runs) for (const arm of ['a', 'b']) {
+    const s = run[arm];
+    if (!s || !Number.isInteger(run.seed) || !Array.isArray(s.trajectory) || s.trajectory.length > 200) throw new Error('run');
+    for (const p of [s, ...s.trajectory]) if (!['step','cells','inGroups','adhesion','meanSize','gape','generations'].every(k => Number.isFinite(p[k]))) throw new Error('sample');
+  }
+  E.summarize(r.runs);
+  return r;
+}
+try { const stored = localStorage.getItem(KEY); if (stored) { const parsed = JSON.parse(stored); if (!Array.isArray(parsed) || parsed.length > 12) throw new Error('notebook'); notebook = parsed.map(validateRecord); } }
+catch (_) { notebookOK = false; }
+function setStatus(key) { status = key; renderStatus(); }
+function renderStatus() {
+  $('xStatus').textContent = status === 'running' && progress ? `${t('running')} · ${t('repeat')} ${progress.repeat}/${progress.repeats} · ${t('step')} ${progress.step}/${progress.total}` : t(status);
+}
+function setBusy(busy) {
+  $('xSettings').disabled = busy; $('xRun').disabled = busy; $('xCancel').disabled = !busy;
+  document.body.dataset.experimentRunning = busy ? 'true' : 'false';
+  $('xSave').disabled = busy || !current || !current.complete || !notebookOK;
+  for (const id of ['xCSV','xJSON']) $(id).disabled = busy || !current || !current.runs.length;
+  renderNotebook();
+}
+function finish(key) { if (worker) worker.terminate(); worker = null; if (current) current.status = key; setBusy(false); setStatus(key); }
+function start(event) {
+  if (event) event.preventDefault();
+  if (worker || !$('xForm').reportValidity()) return;
+  let config;
+  try { config = configFromForm(); } catch (_) { setStatus('invalid'); return; }
+  current = { v: 1, id: Date.now().toString(36), created: new Date().toISOString(), model: E.MODEL, protocolVersion: E.PROTOCOL_VERSION, config, notes: '', runs: [], complete: false };
+  $('xNotes').value = ''; $('xResults').hidden = false; $('xProgress').value = 0; progress = null;
+  renderResults(); setBusy(true); setStatus('running');
+  let url;
+  try {
+    const source = ['column-engine', 'experiment-engine', 'experiment-worker'].map(id => $(id).textContent).join('\n;\n');
+    url = URL.createObjectURL(new Blob([source], { type: 'text/javascript' }));
+    worker = new Worker(url); renderNotebook();
+    worker.onmessage = ({ data }) => {
+      if (data.type === 'progress') { progress = data; $('xProgress').value = ((data.repeat - 1) + data.step / data.total) / data.repeats; renderStatus(); }
+      if (data.type === 'replicate') { current.runs.push(data.run); renderResults(); }
+      if (data.type === 'done') { current.runs = data.runs; current.complete = true; $('xProgress').value = 1; renderResults(); finish('completed'); }
+      if (data.type === 'error') finish('failed');
+    };
+    worker.onerror = () => finish('failed');
+    worker.postMessage({ config });
+  } catch (_) { finish('failed'); }
+  finally { if (url) URL.revokeObjectURL(url); }
+}
+function metric(label, value, detail, unit) {
+  const box = make('article'), number = make('b'), isolated = make('bdi', value); isolated.dir = 'ltr'; number.append(isolated);
+  if (unit) number.append(make('span', ' ' + unit));
+  box.append(make('span', label), number, make('small', detail)); $('xMetrics').append(box);
+}
+function renderResults() {
+  if (!current) return;
+  const c = current.config, labels = t('conditions')[c.factor], summary = E.summarize(current.runs), d = summary.difference;
+  $('xResultConfig').textContent = `${describe(c)} · ${t('model')} ${current.model} · ${t('protocolVersion')} ${current.protocolVersion}`;
+  $('xMetrics').replaceChildren();
+  metric(t('groups'), d.inGroups.mean === null ? '—' : num(d.inGroups.mean * 100), `${t('paired')} · ${t('range')}: ${d.inGroups.min === null ? '—' : num(d.inGroups.min * 100) + ' … ' + num(d.inGroups.max * 100)}`, t('pp'));
+  metric(t('population'), num(d.cells.mean, 0), `${t('paired')} · A: ${num(summary.a.means.cells, 0)} · B: ${num(summary.b.means.cells, 0)}`);
+  metric(t('extinctions'), `A ${summary.a.extinctions}/${summary.n} · B ${summary.b.extinctions}/${summary.n}`, `A: ${labels[0]} · B: ${labels[1]}`);
+  $('xLegend').replaceChildren();
+  labels.forEach((label, i) => { const span = make('span', `${i ? 'B' : 'A'} · ${label}`); const dot = make('i'); dot.style.background = i ? '#e3a33b' : '#7ad8ff'; span.prepend(dot); $('xLegend').append(span); });
+  drawChart(current.runs[current.runs.length - 1]);
+  $('xTableHead').replaceChildren(); const head = make('tr');
+  ['seed','arm','population','groups','adhesion','size','state'].forEach(k => { const cell = make('th',t(k)); cell.scope = 'col'; head.append(cell); }); $('xTableHead').append(head);
+  $('xTableCaption').textContent = t('endpoint'); $('xTableBody').replaceChildren();
+  current.runs.forEach(run => ['a','b'].forEach((arm, i) => {
+    const s = run[arm], row = make('tr');
+    [run.seed, `${arm.toUpperCase()} · ${labels[i]}`, s.cells, num(s.inGroups * 100) + '%', num(s.adhesion,3), num(s.meanSize,2), t(s.extinct ? 'extinct' : 'alive')].forEach(value => row.append(make('td', value)));
+    $('xTableBody').append(row);
+  }));
+  $('xInterpretation').textContent = [current.complete ? '' : t('partial'), t('caution'), summary.n < 2 ? t('single') : '', current.model !== E.MODEL || current.protocolVersion !== E.PROTOCOL_VERSION ? t('old') : ''].filter(Boolean).join(' ');
+}
+function drawChart(run) {
+  const svg = $('xChart'), NS = 'http://www.w3.org/2000/svg'; svg.replaceChildren();
+  const add = (tag, attrs, text) => { const el = document.createElementNS(NS,tag); for (const [k,v] of Object.entries(attrs)) el.setAttribute(k,v); if (text !== undefined) el.textContent = text; svg.append(el); return el; };
+  add('title',{id:'xChartTitle'},t('trajectory'));
+  const W = 670, H = 170, left = 55, top = 20;
+  [0,.5,1].forEach(v => { const y=top+(1-v)*H; add('line',{x1:left,y1:y,x2:left+W,y2:y,stroke:'#26363c'}); add('text',{x:left-8,y:y+4,fill:'#a99f8a','font-size':12,'text-anchor':'end'},(v*100)+'%'); });
+  [0,.5,1].forEach(v => add('text',{x:left+v*W,y:216,fill:'#a99f8a','font-size':12,'text-anchor':'middle'},Math.round(v*current.config.steps)));
+  if (run) ['a','b'].forEach((arm,i) => add('polyline',{points:run[arm].trajectory.map(p => `${left+p.step/current.config.steps*W},${top+(1-p.inGroups)*H}`).join(' '),fill:'none',stroke:i?'#e3a33b':'#7ad8ff','stroke-width':2.5,'stroke-dasharray':i?'7 4':'none'}));
+}
+function persist(next, message) {
+  try { localStorage.setItem(KEY, JSON.stringify(next)); notebook = next; $('xNotebookStatus').textContent = t(message); renderNotebook(); return true; }
+  catch (_) { $('xNotebookStatus').textContent = t('storageError'); return false; }
+}
+function save() {
+  if (!current || !current.complete || !notebookOK) return;
+  current.notes = $('xNotes').value;
+  const next = notebook.filter(r => r.id !== current.id);
+  if (next.length >= 12) { $('xNotebookStatus').textContent = t('full'); return; }
+  try { validateRecord(current); } catch (_) { $('xNotebookStatus').textContent = t('storageError'); return; }
+  persist([JSON.parse(JSON.stringify(current)), ...next], 'saved');
+}
+function download(kind) {
+  if (!current || !current.runs.length || worker) return;
+  current.notes = $('xNotes').value;
+  const content = kind === 'csv' ? '\ufeff' + E.toCSV(current) : JSON.stringify(current, null, 2);
+  const url = URL.createObjectURL(new Blob([content], {type:kind === 'csv' ? 'text/csv;charset=utf-8' : 'application/json'}));
+  const a = make('a'); a.href = url; a.download = `genesis-${current.config.factor}-${current.config.seed}.${kind}`; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url),1000);
+}
+function renderNotebook() {
+  const list = $('xNotebook'); list.replaceChildren();
+  if (!notebookOK) { $('xNotebookStatus').textContent = t('corrupt'); return; }
+  if (!notebook.length) { list.append(make('p',t('empty'),'note')); return; }
+  notebook.forEach(record => {
+    const item = make('article'), info = make('div'), actions = make('div',undefined,'x-actions');
+    info.append(make('p',describe(record.config)),make('small',new Date(record.created).toLocaleString(lang()) + ' · ' + record.model));
+    for (const action of ['open','rerun','remove']) {
+      const button = make('button',t(action),'btn'); button.type='button'; button.disabled=!!worker;
+      button.onclick = () => {
+        if (worker) return;
+        if (action === 'remove') { if (window.confirm(t('confirmDelete'))) persist(notebook.filter(r=>r.id!==record.id),'removed'); return; }
+        for (const [key,id] of Object.entries({factor:'xFactor',seed:'xSeed',repeats:'xRepeats',steps:'xSteps'})) $(id).value=record.config[key];
+        renderConditions();
+        if (action === 'rerun') { start(); return; }
+        current=JSON.parse(JSON.stringify(record)); current.complete=true; $('xNotes').value=current.notes; $('xResults').hidden=false; $('xProgress').value=1; renderResults(); setBusy(false); setStatus('completed');
+      };
+      actions.append(button);
+    }
+    item.append(info,actions); list.append(item);
+  });
+}
+function renderConditions() { const labels = t('conditions')[$('xFactor').value]; $('xConditions').textContent=`A · ${labels[0]}     /     B · ${labels[1]}`; }
+function applyLang() {
+  document.querySelectorAll('[data-x18n]').forEach(el=>el.textContent=t(el.dataset.x18n));
+  $('xProgress').setAttribute('aria-label',t('progress')); renderConditions(); renderStatus(); renderNotebook(); if (current) renderResults();
+}
+$('xForm').onsubmit=start; $('xCancel').onclick=()=>finish('cancelled'); $('xFactor').onchange=renderConditions;
+$('xSave').onclick=save; $('xCSV').onclick=()=>download('csv'); $('xJSON').onclick=()=>download('json');
+document.addEventListener('genesis:lang',applyLang); window.addEventListener('pagehide',()=>{if(worker)finish('cancelled');});
+applyLang();
+})();
 
 </script>
 <script>
@@ -4259,7 +4688,7 @@ const L = {
     phys_t: 'زمن فيزيائي', bio_t: 'زمن بيولوجي', gens: 'جيل خلوي', cells: 'خلية', inOrg: 'داخل كائنات', preds: 'مفترس', flow: 'سرعة التيار (rms)',
     physics: 'الفيزياء', c_flow: 'الاقتران الهيدروديناميكي', c_flow_d: 'وزن الخلايا يحرّك الماء (معادلات ستوكس)',
     c_light: 'شدة الضوء عند السطح', c_turb: 'عكارة الماء', c_nut: 'إمداد الغذاء', c_source: 'مصدر الغذاء', src_mixed: 'في الماء', src_sed: 'من الرواسب',
-    c_stir: 'رجّ الوعاء', biology: 'الأحياء', c_pred: 'مفترسات (دوّارات)', c_pred_d: 'تبتلع أي كائن أصغر من فمها، وفمها يتطور',
+    c_stir: 'رجّ الوعاء', biology: 'الأحياء', c_pred: 'مفترسات (دوّارات)', c_pred_d: 'نجاح الالتقاط يعتمد على نسبة حجم الفريسة إلى الفم، والفم يتطور',
     c_ratio: 'مفترسات لكل 100 خلية', c_mut: 'معدل الطفرات لكل جين', c_clock: 'الساعة البيولوجية أسرع من الفيزيائية ×400',
     view: 'العرض', c_tracers: 'جسيمات تتبّع التيار', c_quiver: 'أسهم السرعة', c_color: 'التلوين',
     cb_lin: 'السلالة', cb_type: 'نوع الخلية (تكاثرية / جسدية)', cb_swim: 'قوة السباحة', cb_buoy: 'الطفو', cb_bond: 'متانة الرابطة',
@@ -4297,7 +4726,7 @@ const L = {
     phys_t: 'physical time', bio_t: 'biological time', gens: 'cell generations', cells: 'cells', inOrg: 'in organisms', preds: 'predators', flow: 'flow speed (rms)',
     physics: 'Physics', c_flow: 'Hydrodynamic coupling', c_flow_d: 'Cell weight moves the water (Stokes equations)',
     c_light: 'Surface light', c_turb: 'Water turbidity', c_nut: 'Nutrient supply', c_source: 'Nutrient source', src_mixed: 'In the water', src_sed: 'From sediment',
-    c_stir: 'Shake the jar', biology: 'Biology', c_pred: 'Predators (rotifers)', c_pred_d: 'They swallow any organism smaller than their mouth, and the mouth evolves',
+    c_stir: 'Shake the jar', biology: 'Biology', c_pred: 'Predators (rotifers)', c_pred_d: 'Capture depends on prey size relative to the evolving mouth',
     c_ratio: 'Predators per 100 cells', c_mut: 'Mutation rate per gene', c_clock: 'Biological clock runs ×400 faster than physics',
     view: 'View', c_tracers: 'Flow tracer particles', c_quiver: 'Velocity arrows', c_color: 'Colour by',
     cb_lin: 'Lineage', cb_type: 'Cell type (germ / soma)', cb_swim: 'Swimming force', cb_buoy: 'Buoyancy', cb_bond: 'Bond strength',
@@ -4337,6 +4766,7 @@ const t = (k) => (L[lang()][k] !== undefined ? L[lang()][k] : k);
 /* ---------------- state ---------------- */
 let seed = 777;
 let sim = new Column(seed);
+let resumedModel = null;
 let running = true, speed = 4, selected = null, follow = false, colorBy = 'lin', showTr = true, showQ = false;
 const cam = { z: 1, x: LX / 2, y: LZ / 2 };
 let banner = null, lastEv = -1, lastMs = 0, frame = 0;
@@ -4765,7 +5195,7 @@ const PRESETS = [
 ];
 function newSim(opts) {
   seed = (seed * 1103515245 + 12345) % 2147483647;
-  sim = new Column(seed, opts || {});
+  sim = new Column(seed, opts || {}); resumedModel = null;
   selected = null; follow = false; lastEv = -1; lastMs = 0; banner = null; cam.z = 1; cam.x = LX / 2; cam.y = LZ / 2;
 }
 function sync() {
@@ -4779,7 +5209,10 @@ function sync() {
   set('#cRatio', p.predRatio, p.predRatio.toFixed(1));
   set('#cMut', p.mut, p.mut.toFixed(2));
   $('#cColor').value = colorBy; $('#cTr').checked = showTr; $('#cQ').checked = showQ;
-  $('#cSeed').textContent = 'seed ' + seed;
+  $('#cSeed').textContent = 'seed ' + sim.seed;
+  const notice = $('#cModelNotice');
+  notice.hidden = !resumedModel;
+  notice.textContent = resumedModel ? (lang() === 'ar' ? 'استُؤنف عالم من نموذج سابق بالقواعد الحالية. هذه متابعة محلية؛ تغير الإصدار قد يؤثر في المسار.' : 'A world from an earlier model is continuing under the current rules. This local continuation may follow a different trajectory after the version change.') : '';
   legends();
 }
 function legends() {
@@ -4852,7 +5285,7 @@ function zoomAt(e, f) {
 
 function loop() {
   if (document.body.dataset.world === 'column') {
-    if (running && sim.cells.length) {
+    if (running && document.body.dataset.experimentRunning !== 'true' && sim.cells.length) {
       const t0 = performance.now();
       for (let i = 0; i < speed; i++) { sim.step(); if (performance.now() - t0 > 26) break; }
     }
@@ -4868,7 +5301,7 @@ bind(); applyLang();
 window.__column = {
   get sim() { return sim; }, cam,
   // load a saved world (from the perpetual run) and keep simulating it here
-  load(st) { sim = Column.fromState(st); selected = null; follow = false; lastEv = -1; lastMs = sim.t; banner = null; cam.z = 1; cam.x = LX / 2; cam.y = LZ / 2; sync(); updateTicker(true); renderCard(); drawCharts(); updateStatus(); },
+  load(st) { sim = Column.fromState(st); resumedModel = String(st.modelVersion || 'legacy') !== K.MODEL_VERSION; selected = null; follow = false; lastEv = -1; lastMs = sim.t; banner = null; cam.z = 1; cam.x = LX / 2; cam.y = LZ / 2; sync(); updateTicker(true); renderCard(); drawCharts(); updateStatus(); },
 };
 requestAnimationFrame(loop);
 })();
@@ -4915,6 +5348,10 @@ const L = {
     v_supported: 'مدعوم', v_deviates: 'ينحرف', v_pending: 'يجمع الأدلة', 'v_not general': 'ليس عامًا', 'v_same direction, different scale': 'الاتجاه صحيح والمقدار مختلف',
     n_exp: 'تجربة', fitk: 'الميل', r2: 'R²', threshold: 'العتبة', withP: 'مع مفترسات', withoutP: 'بلا مفترسات', transitions: 'انتقالات', collapses: 'انهيارات',
     clonal: 'نسيلية', chimeric: 'خيمرية', rel: 'الارتباط r',
+    extinct_runs: 'انتهت بالانقراض', all_runs: 'نسبة الوصول خلال التجربة؛ المقام يشمل كل التجارب، حتى المنقرضة.',
+    preceded: 'انهيارات سبقها تجاوز للحجم', crossing_note: 'تجاوز مرصود بعد الانتقال وقبل الانهيار، بقياس كل 500 خطوة. النسبة gape / ⌀ تقارن الفم بقطر الكائنات في العينة السابقة للانهيار؛ لا تحدد سبب الانهيار.',
+    historical: 'بيانات تاريخية', historical_note: 'هذه النتائج تخص نموذجًا أو بروتوكولًا سابقًا. حُجبت أحكام الدعم حتى تتوفر تجارب بالإصدار الحالي؛ السجل الأصلي محفوظ.',
+    archived: 'تجربة تاريخية محفوظة ومستبعدة من هذه الحسابات', current_evidence: 'تجارب الإصدار الحالي', evidence_version: 'إصدار النموذج / البروتوكول',
     w_herd: 'القطيع', w_column: 'عمود الماء', w_origins: 'الأصول',
     nodata: 'لا توجد بيانات بعد. ستظهر هنا بعد أول تشغيل مجدول على GitHub.', loaded: 'المصدر',
     ladder_ceiling: 'سقف هذا النموذج', ceiling_note: 'يحتاج قوانين أو جينات غير موجودة في هذا العالم',
@@ -4943,6 +5380,10 @@ const L = {
     v_supported: 'Supported', v_deviates: 'Deviates', v_pending: 'Gathering evidence', 'v_not general': 'Not general', 'v_same direction, different scale': 'Right direction, different scale',
     n_exp: 'experiments', fitk: 'slope', r2: 'R²', threshold: 'threshold', withP: 'with predators', withoutP: 'without predators', transitions: 'transitions', collapses: 'collapses',
     clonal: 'clonal', chimeric: 'chimeric', rel: 'relatedness r',
+    extinct_runs: 'ended in extinction', all_runs: 'Share reaching the transition during a run; the denominator includes every run, including extinctions.',
+    preceded: 'collapses preceded by a crossing', crossing_note: 'A crossing observed after transition and before collapse, sampled every 500 steps. gape / ⌀ compares gape with organism diameter in the sample before collapse; it does not identify the cause.',
+    historical: 'Historical evidence', historical_note: 'These results belong to an earlier model or protocol. Support verdicts are hidden until current-version experiments are available; original evidence is preserved.',
+    archived: 'historical runs retained and excluded from these calculations', current_evidence: 'current-version runs', evidence_version: 'model / protocol version',
     w_herd: 'Herd', w_column: 'Water column', w_origins: 'Origins',
     nodata: 'No data yet. It will appear after the first scheduled run on GitHub.', loaded: 'source',
     ladder_ceiling: 'This model’s ceiling', ceiling_note: 'needs laws or genes that do not exist in this world',
@@ -5131,6 +5572,9 @@ function renderStatus() {
   $('#bUpd').textContent = S ? ago(S.updated) : '—';
   $('#bSource').textContent = D.source ? `${t('loaded')}: ${D.source}` : t('nodata');
   $('#bWatch').disabled = !D.source;
+  const old = S && String(S.modelVersion || 'legacy') !== String(window.GenesisColumn.MODEL_VERSION);
+  const mixed = S && S.modelChanges && S.modelChanges.length;
+  $('#bModelNotice').textContent = old ? (lang() === 'ar' ? 'بيانات العالم المعروض من نموذج سابق. زر المشاهدة يستأنف نسخة محلية بقواعد النموذج الحالي؛ لا يغيّر العالم المنشور.' : 'Displayed world data uses an earlier model. Watch continues a local copy under current rules; it does not change the published world.') : mixed ? (lang() === 'ar' ? 'يمتد سجل هذا العالم عبر إصدارات مختلفة؛ الأرقام القياسية التاريخية ليست نتائج لنموذج واحد ثابت.' : 'This world spans model versions; its historical records do not describe one unchanged model.') : '';
 }
 function renderMs() {
   const box = $('#bMs');
@@ -5173,9 +5617,18 @@ function lawScatter(cv, law) {
 }
 function renderLaws() {
   const box = $('#bLaws');
+  const notice = $('#bLawsNotice');
+  notice.textContent = '';
   if (!D.laws) { box.innerHTML = `<p class="insp-empty">${t('nodata')}</p>`; $('#bLawsMeta').textContent = ''; return; }
   const total = Object.values(D.laws.counts || {}).reduce((a, b) => a + b, 0);
-  $('#bLawsMeta').textContent = `${total} ${t('n_exp')} · ${ago(D.laws.updated)}`;
+  const current = D.laws.modelVersion === String(window.GenesisColumn.MODEL_VERSION) && D.laws.protocolVersion === '2';
+  if (!current) {
+    $('#bLawsMeta').textContent = `${t('historical')} · ${total} ${t('n_exp')} · ${ago(D.laws.updated)}`;
+    notice.textContent = t('historical_note'); box.replaceChildren(); return;
+  }
+  const historical = Object.values(D.laws.historicalCounts || {}).reduce((a, b) => a + b, 0);
+  $('#bLawsMeta').textContent = `${total} ${t('current_evidence')} · ${t('evidence_version')} ${D.laws.modelVersion} / ${D.laws.protocolVersion} · ${ago(D.laws.updated)}`;
+  if (historical) notice.textContent = `${historical} ${t('archived')}.`;
   const cls = (v) => v === 'supported' ? 'good' : v === 'pending' ? 'wait' : 'bad';
   box.innerHTML = D.laws.laws.map((law, i) => {
     let body = '';
@@ -5183,9 +5636,9 @@ function renderLaws() {
       const f = law.fit;
       body = `<canvas class="lawc" data-l="${i}"></canvas><p class="note">${(LAW_EXTRA[law.id] || {})[lang()] || ''}${f ? ` · ${t('fitk')} <bdi dir="ltr" class="mono">${f.k} ± ${f.se}</bdi> · ${t('r2')} <bdi dir="ltr" class="mono">${f.r2}</bdi> · n <bdi class="mono">${f.n}</bdi>` : ''}${law.threshold ? ` · ${t('threshold')} ≈ <bdi dir="ltr" class="mono">${(law.threshold / 1e6).toFixed(1)}M/mL</bdi>` : ''}</p>`;
     } else if (law.id === 'predation') {
-      body = `<div class="eq"><div><span>${t('withP')}</span><b>${law.withPred.frac === null ? '—' : Math.round(law.withPred.frac * 100) + '%'}</b><span class="mono">n ${law.withPred.n}</span></div><div><span>${t('withoutP')}</span><b>${law.without.frac === null ? '—' : Math.round(law.without.frac * 100) + '%'}</b><span class="mono">n ${law.without.n}</span></div></div>`;
+      body = `<div class="eq"><div><span>${t('withP')}</span><b>${law.withPred.frac === null ? '—' : Math.round(law.withPred.frac * 100) + '%'}</b><span class="mono">${law.withPred.transitions} / ${law.withPred.n}</span><span>${t('extinct_runs')}: ${law.withPred.extinct}</span></div><div><span>${t('withoutP')}</span><b>${law.without.frac === null ? '—' : Math.round(law.without.frac * 100) + '%'}</b><span class="mono">${law.without.transitions} / ${law.without.n}</span><span>${t('extinct_runs')}: ${law.without.extinct}</span></div></div><p class="note">${t('all_runs')}</p>`;
     } else if (law.id === 'redqueen') {
-      body = `<div class="eq"><div><span>${t('transitions')}</span><b>${law.transitions}</b></div><div><span>${t('collapses')}</span><b>${law.collapses}</b></div><div><span>gape / ⌀</span><b>${law.gapeRatio ?? '—'}</b></div></div>`;
+      body = `<div class="eq"><div><span>${t('transitions')}</span><b>${law.transitions}</b><span>${t('extinct_runs')}: ${law.extinct}</span></div><div><span>${t('collapses')}</span><b>${law.collapses}</b></div><div><span>${t('preceded')}</span><b>${law.preceded}</b></div></div><p class="note">${t('crossing_note')} <bdi class="mono">gape / ⌀ = ${law.gapeRatio ?? '—'}</bdi></p>`;
     } else if (law.id === 'chimeras') {
       body = `<div class="eq"><div><span>${t('clonal')} · ${t('rel')}</span><b>${law.clonal.rel ?? '—'}</b><span class="mono">n ${law.clonal.n}</span></div><div><span>${t('chimeric')} · ${t('rel')}</span><b>${law.chimeric.rel ?? '—'}</b><span class="mono">n ${law.chimeric.n}</span></div></div>`;
     }

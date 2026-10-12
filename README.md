@@ -7,9 +7,24 @@
 - **القطيع:** حيوانات بجينوم ثنائي الصيغة ودورة شبق، وأنت تصمّم برنامج التربية: انتخاب طبيعي، أو تزاوج انتخابي، أو تلقيح اصطناعي مع تقييم جينومي.
 
 ## التشغيل
-**على الإنترنت:** الموقع على Vercel، والعالم الأبدي يعمل عبر GitHub Actions (انظر `DEPLOY.md`).
+**النشر:** الموقع مرتبط بالفرع `main` في المستودع `YasirObaid5/genesis-evolution`. سجل تسليم النموذج 2 والتحقق من نشره في `HANDOFF.md`، وطريقة التشغيل والنشر في `DEPLOY.md`.
 
-افتح `index.html` في Chrome أو Edge. لا يحتاج إلى تثبيت ولا إنترنت، باستثناء الخطوط من Google Fonts (إن لم تتوفر يستخدم خطوط النظام). التبديل بين العالمين من الأزرار أعلى الصفحة، والواجهة بالعربية والإنجليزية.
+افتح `index.html` في Chrome أو Edge. لا يحتاج إلى تثبيت ولا إنترنت، باستثناء الخطوط من Google Fonts (إن لم تتوفر يستخدم خطوط النظام). التبديل بين العوالم من الأزرار أعلى الصفحة، والواجهة بالعربية والإنجليزية.
+
+بعد تعديل ملفات المصدر: `python build.py`، وللاختبارات: `npm test` (Node ≥ 20، وPython 3 للبناء، بلا حزم إضافية). يقرأ البناء ملفات العربية ويكتبها بترميز UTF-8.
+
+## تحديث 12 أكتوبر 2026: النموذج 2 و«ماذا لو؟»
+
+داخل عمود الماء أصبحت المقارنة تبدأ بمجتمعين متطابقين وبحالة عشوائية ابتدائية واحدة، ثم يتغير عامل واحد: المفترسات، أو حركة الماء، أو مصدر الغذاء، أو شدة الضوء. إعدادات المقارنة هي إعدادات البركة الافتراضية الثابتة، وليست إعدادات العمود الحي. البذرة الافتراضية 777، مع 3 تكرارات و5000 خطوة؛ يمكن اختيار 1–12 تكرارًا و100–36000 خطوة. تزيد البذرة واحدًا لكل تكرار.
+
+- يعرض الملخص فروق B − A ونتيجة كل تكرار، ويحتسب التجارب المنقرضة ويذكر عددها. النسبة صفر عند الانقراض تعني غياب الخلايا؛ ليست عودة إلى الحياة المنفردة. المدى المعروض ليس فاصل ثقة.
+- يُحفظ نحو 100 قياس للمسار في التجربة الطويلة، بفاصل `max(20, ceil(steps/100))`، مع البداية والنهاية. يرسم العرض آخر تكرار مكتمل. وقد تفوت القمم القصيرة بين القياسات.
+- دفتر محلي حتى 12 تجربة، مع التوقعات والملاحظات وإعادة التشغيل وتنزيل CSV للنتائج النهائية وJSON للتجربة كاملة ومساراتها. مسح بيانات المتصفح يزيل الدفتر؛ التنزيل هو النسخة الخارجية.
+- تعمل المقارنة في عامل خلفي مستقل، ويمكن إلغاؤها. لا تعدّل العمود الحي أو ملفات العالم الأبدي؛ بعد الإلغاء يمكن تنزيل التكرارات التي اكتملت كبيانات جزئية (`complete: false`)، بينما يقبل الدفتر التجارب المكتملة فقط.
+
+صُحّح انحياز الطفرات الكبيرة لفم المفترس في عمود الماء والأصول، فأصبحت الزيادة والنقصان متساويتي الاحتمال **في لوغاريتم الحجم قبل تطبيق الحد الأدنى للفم**. في عمود الماء أصبحت كفاءة الالتقاط `16r²(1−r)²` عندما `0 < r = قطر الفريسة / عرض الفم < 1`، وصفرًا خارجها؛ الذروة عند نصف عرض الفم، والمحاولة الفاشلة تستهلك أربع خطوات معالجة. هذه نافذة تعليمية غير معايرة تجريبيًا. أُلغي الحد الأدنى الإجباري لمفترسين، وأصبح المناخ يعود نحو قيم مرجعية بحدود انعكاسية بدل التراكم عند حدود القص.
+
+**حدود هذه الدفعة:** الاختبارات تتحقق من السلوك البرمجي والحفظ القديم، ولا تثبت نتائج تطورية جديدة. لم تُنجز تجارب علمية طويلة للإصدار 2. الحفظ يُستأنف تقريبًا ولا يعيد المسار بتطابق كامل؛ إعادة المقارنة تبدأ من البذرة على الإصدار والبروتوكول نفسيهما. لم يُضف متحف إحياء السلالات أو شبكة تنظيم جيني أو انتخاب متعدد الصفات.
 
 ---
 
@@ -35,7 +50,9 @@
 - **المفترسات:** دوّارات بفم محدود القطر يتطور. عددها يتناسب مع عدد الطحالب (نمط الكيموستات)، ويحلّ أنجحها محلّ أجوعها.
 - **خمسة جينات:** الالتصاق، والتخصص الجسدي، وقوة السوط، ومتانة الرابطة، والطفو.
 
-### ما وجدته في التجارب (بذور عشوائية مختلفة)
+### نتائج تاريخية للنموذج 1 (قبل التصحيحات)
+
+هذه ملاحظات النسخة السابقة وليست أدلة للإصدار 2؛ خصوصًا نتائج الافتراس وسباق التسلح التي قد تتأثر بانحياز الطفرات القديم.
 1. **الحمل الحيوي يظهر من الفيزياء وحدها.** خلال نحو 25 ثانية تتجمع الطحالب عند السطح، ثم تنقلب الطبقة الكثيفة إلى أعمدة هابطة.
    - سرعة الماء: 40 إلى 70 µm/s كمتوسط تربيعي، وتبلغ 100 إلى 250 µm/s كحد أقصى.
    - عند إيقاف الاقتران الهيدروديناميكي يختفي التكتل الأفقي.
@@ -75,7 +92,9 @@
 - **سباق التسلح:** متوسط حجم الكائنات مقابل فم المفترسات.
 - **بطاقة الكائن:** شكل الجسم، وجيناته، وعدد الطرز الوراثية داخله، وسلالة أسلافه بأحجامهم.
 
-### ما ظهر في اختباراتي (لا شيء منه مبرمج)
+### نتائج تاريخية للأصول في النموذج 1
+
+النتائج التالية سبقت تصحيح طفرات المفترسات؛ يلزم تكرار التجارب قبل تعميمها على الإصدار الحالي.
 - مع المفترسات والغذاء المعقد ارتفع الالتصاق من 0.04 إلى نحو 0.9. ظهر أول كائن من 16 خلية بعد نحو 2,600 خطوة، وصار نحو 90% من الخلايا داخل كائنات.
 - المفترسات طوّرت أفواهًا أكبر (من 1.6 إلى 3.9 خلايا في أحد الاختبارات)، فارتفع حجم الكائنات معها.
 - في وضع «الالتحام بالغرباء» نشأت كائنات خيمرية عملاقة تجاوزت 256 خلية، لكن الارتباط داخلها انخفض إلى ما بين 0.5 و0.7، مقابل 0.86 إلى 0.99 في الكائنات النسيلية. هذا هو أساس صراع المستويات.
@@ -115,7 +134,9 @@
 ---
 
 ## مرصد القوانين (`runner/laws.mjs`)
-كل تشغيل يضيف تجارب جديدة ببذور عشوائية، ويعيد حساب الحكم على كل قانون من جميع الأدلة المتراكمة:
+كل تشغيل يضيف تجارب جديدة ببذور عشوائية، مع `modelVersion: '2'` و`protocolVersion: '2'`. الأحكام الحالية تحتسب الصفوف المطابقة لهذين الإصدارين فقط؛ تظل النتائج الأقدم محفوظة ومفصولة في `historicalCounts`. يُحتسب الانقراض ضمن مقام تجارب الافتراس. بروتوكول المقارنة المحلية مستقل ورقمه 1 (`water-column/2`).
+
+وعند استئناف العالم الأبدي من نموذج قديم، يسجل المشغّل حدّ التغيير في `modelChanges` ويحافظ على الحالة والحقبة والعدادات. تحمل السجلات الجديدة رقم النموذج؛ لا تُعاد تسمية السجلات القديمة. لذا تبقى الأرقام التراكمية العابرة للإصدارات سجلًا تاريخيًا مختلطًا، لا دليلًا مستقلًا للنموذج 2.
 
 | القانون | العالم | كيف يُختبر |
 |---|---|---|
@@ -125,10 +146,10 @@
 | معدل التربية الداخلية ΔF ≈ 1/(2Ne) | القطيع | ΔF المقاس من ln(1−F) مقابل 1/(2Ne) المحسوب من مساهمات الآباء في كل جيل |
 | عتبة الحمل الحيوي | عمود الماء | سرعة الماء مقابل تركيز السبّاحين |
 | الافتراس يدفع نحو تعدد الخلايا | عمود الماء | نسبة الانتقال مع المفترسات مقابل بدونها |
-| انهيار سباق التسلح | عمود الماء | هل ينهار تعدد الخلايا بعد أن يتجاوز فم المفترس قطر الكائنات؟ |
+| انهيار سباق التسلح | عمود الماء | هل يسبق نصف الانهيارات على الأقل عبور مرصود للفم فوق قطر الكائنات بعد الانتقال؟ القياس كل 500 خطوة وقد يفوت العبور؛ التعاقب لا يثبت السببية |
 | الخيمرية تخفض الارتباط | الأصول | الارتباط r في الكائنات الخيمرية مقابل النسيلية |
 
-النتائج الأولية قبل النشر:
+نتائج أولية تاريخية للنموذج والبروتوكول السابقين:
 - تجربة تربية داخلية واحدة أعطت ΔF = 0.029 مقابل نظري 0.027.
 - 12 نقطة لتقدير المكافئ الوراثي أعطت ميلًا قدره 0.93 ± 0.06.
 
@@ -141,6 +162,8 @@
 - `src/column.js`: محرّك عمود الماء (ستوكس، الضوء، الغذاء، الميكانيكا، الأحياء).
 - `src/origins.js` و`src/core.js`: محرّكا عالمي الأصول والقطيع. كل المحرّكات تعمل في Node أيضًا.
 - `src/column-ui.js` و`src/origins-ui.js` و`src/ui.js` و`src/template.html` و`src/column.html` و`src/origins.html` و`src/worlds.js`: الواجهة.
+- `src/experiments.js` و`src/experiments-worker.js` و`src/experiments-ui.js`: المقارنة المضبوطة والتشغيل الخلفي والدفتر؛ مع `experiments.html` و`experiments.css` للعرض.
+- `tests/*.test.cjs`: اختبارات المحركات والمقارنات والمرصد.
 - `runner/perpetual.mjs`: العالم الأبدي (استئناف، تطور، أحافير، حقب).
 - `runner/laws.mjs`: مرصد القوانين.
 - `.github/workflows/`: الجدولة على GitHub Actions.
@@ -158,6 +181,14 @@
 
 A living laboratory of evolution with three worlds.
 
+**Local update, 12 October 2026:** model 2 corrects symmetric log-space predator macro-mutation in Column and Origins. Column now uses an explicitly uncalibrated capture window `16r²(1−r)²` for prey diameter/gape `0 < r < 1`, failed-attack handling time, zero/one predators at low populations, and mean-reverting climate with reflecting bounds. Old results below are historical model-1 evidence and do not establish findings for this revision. Deployment of this update has not been verified.
+
+**Replay comparison:** the water-column tab starts two copies of the same seeded default pond and changes only predators, flow, nutrient source or light. Choose 1–12 replicates and 100–36000 steps; seeds advance sequentially. Extinctions remain in the summaries. The last completed replicate's trajectory is shown, with roughly 100 samples for longer runs. A background worker leaves the live/perpetual worlds untouched. Save up to 12 experiments in this browser, rerun them, or download endpoint CSV and full JSON with trajectories. Browser-data deletion removes the notebook. Comparison model is `water-column/2`, protocol 1; laws evidence separately requires model/protocol `'2'` and retains old rows as history.
+
+After cancellation, completed pairs can still be downloaded as partial data (`complete: false`); only full experiments enter the notebook. The perpetual runner records model-change boundaries while retaining state, eras and historical counters, so mixed-version all-time records are identified rather than relabeled.
+
+Run `npm test` and rebuild with `python build.py` (UTF-8). Tests are engineering checks, not long-run scientific replication. Snapshot resumption remains approximate; exact seeded comparisons require the same engine and protocol. Lineage revival, GRNs and multitrait selection remain future work.
+
 **Water column (physics first):** algae in a 4 × 2 mm pond slice. Each step solves the Stokes equations spectrally, using the buoyancy-corrected weight of every cell. The model also includes:
 - gyrotactic swimmers (B = 3.4 s)
 - Stokes drag with a fractal hydrodynamic radius
@@ -166,7 +197,7 @@ A living laboratory of evolution with three worlds.
 - bond fracture under shear and packing
 - gape-limited predators with evolving mouths
 
-Bioconvection plumes emerge from the physics alone, at 40–70 µm/s rms. In three runs, predation drove adhesion from 0.04 to 0.46–0.94. Predator gape then escalated and multicellularity collapsed back to single cells: a model hypothesis, not an established finding.
+Historical model-1 runs reported bioconvection at 40–70 µm/s rms and, in three runs, adhesion rising from 0.04 to 0.46–0.94 under predation. Gape then escalated and multicellularity collapsed. The old upward mutation bias may contribute to that pattern; it must be retested with model 2.
 
 **Origins:** single cells in a drop of water, each carrying five genes:
 - adhesion
@@ -179,4 +210,4 @@ Gape-limited predators with evolving mouths hunt them. Multicellular organisms e
 
 **Herd:** diploid animals with estrous cycles and evolving brains, where you run natural selection, selected natural service, or an AI program with phenotypic or genomic selection. The panels compare Galton's regression with the true h² known from the genome, track the breeder's equation and the genetic trend, and measure inbreeding F from identity by descent.
 
-Open `index.html` in a modern browser. Both models are simplified and built for teaching and exploration.
+Open `index.html` in a modern browser. All three models are simplified and built for teaching and exploration.
