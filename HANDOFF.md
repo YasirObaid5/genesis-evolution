@@ -11,7 +11,7 @@
 - The perpetual world is running on GitHub Actions.
 - The laws observatory has initial evidence.
 
-**Local revision, 2026-10-12 — model 2.** This bounded first batch implements the four P0 engine corrections (symmetric gape macro-mutations, a prey-size capture window, zero/one predators at low N, mean-reverting climate), paired water-column experiments and a local notebook, and versioned observatory evidence that includes extinct predation runs. The prior scientific results and deployment status in this document are historical; no long scientific replication or live deployment of this revision is claimed. Engineering checks use `npm test`; rebuild with `python build.py` (UTF-8). Snapshot continuation remains approximate. GRNs, lineage revival/museum and multitrait herd selection are not implemented in this batch.
+**Published revision, 2026-10-12 — model 2.** This bounded first batch implements the four P0 engine corrections (symmetric gape macro-mutations, a prey-size capture window, zero/one predators at low N, mean-reverting climate), paired water-column experiments and a local notebook, and versioned observatory evidence that includes extinct predation runs. The prior scientific results are historical. This revision is now published and checked as recorded below; no long scientific replication of model 2 is claimed. Engineering checks use `npm test`; rebuild with `python build.py` (UTF-8). Snapshot continuation remains approximate. GRNs, lineage revival/museum and multitrait herd selection are not implemented in this batch.
 
 ---
 
@@ -19,9 +19,17 @@
 
 **ما أنجزه Codex:** نُفذت الدفعة الأولى داخل المشروع الأصلي: تصحيح النموذج والمرصد، وإضافة مقارنة «ماذا لو؟» من البذرة نفسها، والتكرارات والرسوم، ودفتر محلي وتصدير CSV/JSON. لا تكرر هذه الأعمال على أنها مقترحات غير منفذة. النتائج العلمية القديمة تخص النموذج 1؛ اجتياز الاختبارات وتشغيل المقارنة لا يثبتان نتائج علمية للنموذج 2.
 
-**Release status:** the owner has requested publication. Final production URL, source commit/deployment identity and live verification are pending the release check and must be recorded here after confirmation. Until then, the verified scope of this record is the local implementation. Publishing the static website alone does **not** update or execute the GitHub Actions/VPS runners, and does not regenerate `perpetual-data`.
+**Release status: published and verified on 2026-10-12.** The code, runners, tests and documentation were pushed to the existing public repository `YasirObaid5/genesis-evolution`, branch `main`, and the existing Vercel Git integration deployed the site.
 
-The current release is being prepared through the existing Git `main` integration, including source, runners and documentation. Existing workflow files are preserved; no manual world/laws run is planned as part of publication. Updated runner code takes effect on a subsequent scheduled run. The release checkout is `C:\Users\alshi\.codex\releases\genesis-20261012-model2`; the desktop folder remains the editable project source without `.git`. Remote reference/DOI improvements from main commit `6c8b228de965e09277b509fcd8214043c544df1e` were retained in section 20.
+- Production URL: https://genesis-evolution.vercel.app/#column
+- Implementation commit: `d98a032e6be88cc4a501f1aef2b7080232a57d73`.
+- Verified implementation deployment: `dpl_7kB4WbQuH51GpDLuA6Qor5RXHt61`, state `READY`, production alias assigned to `genesis-evolution.vercel.app`. A documentation-only follow-up records this verification; it does not change the built app.
+- Public `GET /`: HTTP 200; 350310 bytes; SHA-256 `68b2616ccb6932f79c2d3b05329d2294cb1eac7d3545d264778a567629b3b241`, equal to the local built `index.html` after normalizing Windows CRLF to Git LF.
+- All 33 tests passed again before publication; `python build.py` succeeded. On the public site, a seed-777, one-replicate, 1000-step paired comparison completed; its Arabic note and result survived save/reload/reopen. Arabic RTL and English LTR were checked at a 390 × 844 viewport (document/scroll width 375, no horizontal overflow); no browser console errors were observed. This is a release smoke test, not scientific evidence.
+
+Existing workflow files were preserved and **no manual world/laws run or data-branch reset was performed**. Publishing includes updated runner source, but it does not regenerate `perpetual-data` immediately: the scheduled runner must execute before new model-2 data appears. No successful model-2 scheduled execution is claimed in this release record; the next maintainer should check Actions before asserting that the external world has migrated. Localhost and production notebooks have separate browser storage.
+
+The release checkout is `C:\Users\alshi\.codex\releases\genesis-20261012-model2`; the desktop folder remains the editable project source without `.git`. Remote reference/DOI improvements from main commit `6c8b228de965e09277b509fcd8214043c544df1e` were retained in section 20.
 
 ### Implemented files and behavior
 
@@ -52,7 +60,7 @@ Actual local browser checks at `http://127.0.0.1:8769/#column` included:
 - Arabic RTL and English LTR, including a 390 × 844 viewport with no horizontal overflow in the inspected page; no observed console errors.
 - Historical remote laws/world data displayed with the model notices instead of current-model evidence claims.
 
-These checks precede the publication requested in the current task. A production check must separately confirm the public built asset and browser behavior; a build or deployment submission alone is insufficient.
+These implementation checks were supplemented by the separate production verification recorded above. Future releases should again confirm the public built asset and browser behavior; a build or deployment submission alone is insufficient.
 
 ### Continuation limits and next work
 
